@@ -95,30 +95,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar buildAppBar() {
     // final UserDataRepository repository = UserDataRepository();
+    FirebaseAuth user = FirebaseAuth.instance;
+    String userEmail = user.currentUser!.email ?? "A";
+    String initial = userEmail[0].toUpperCase();
     return AppBar(
       automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // FutureBuilder<Map<String, dynamic>?>(
-          //   future: repository.getUserData(user!.username),
-          //   builder: (context, snapshot) {
-          //     if (snapshot.connectionState == ConnectionState.waiting) {
-          //       return const CircularProgressIndicator();
-          //     } else if (snapshot.hasError) {
-          //       return Text('Error: ${snapshot.error}');
-          //     } else {
-          //       final userData = snapshot.data;
-          //       final username = userData?['username'] ?? 'User';
-          //       final usernameCapitalized = username.isNotEmpty
-          //           ? username[0].toUpperCase() + username.substring(1)
-          //           : username;
-
-          //       return Text('$usernameCapitalized',
-          //           style: const TextStyle(fontSize: 20));
-          //     }
-          //   },
-          // ),
+          CircleAvatar(
+            child: Text(initial),
+          ),
           _signOutButton(),
         ],
       ),
