@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:notes_app/app_style.dart';
 
 class NoteEditorScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class NoteEditorScreen extends StatefulWidget {
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   // ignore: non_constant_identifier_names
   int color_id = Random().nextInt(AppStyle.cardsColor.length);
-  String date = DateTime.now().toString();
+  String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _mainController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;

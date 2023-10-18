@@ -8,7 +8,6 @@ class AppStyle {
 
   static Color titleColor = const Color(0xFF192a33);
   static Color textColor = const Color(0xFF4a6078);
-  static Color dateColor = const Color(0xFFa4b8c1);
 
   static Color buttonColor = const Color(0xFFff6e61);
 
@@ -30,5 +29,5 @@ class AppStyle {
   static TextStyle mainContent = GoogleFonts.nunito(
       fontSize: 16.0, fontWeight: FontWeight.normal, color: textColor);
   static TextStyle dateTitle = GoogleFonts.roboto(
-      fontSize: 13.0, fontWeight: FontWeight.w500, color: dateColor);
+      fontSize: 13.0, fontWeight: FontWeight.w500, color: titleColor);
 }
