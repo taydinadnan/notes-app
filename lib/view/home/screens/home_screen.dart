@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppStyle.mainColor,
+      backgroundColor: AppStyle.bgColor,
       appBar: buildAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               "Your recent Notes",
               style: GoogleFonts.roboto(
-                color: Colors.white,
+                color: AppStyle.titleColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
               ),
@@ -80,15 +80,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppStyle.buttonColor,
         onPressed: () {
           Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => const NoteEditorScreen()));
         },
-        label: const Text("Add Note"),
-        icon: const Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -96,15 +96,16 @@ class _HomeScreenState extends State<HomeScreen> {
   AppBar buildAppBar() {
     // final UserDataRepository repository = UserDataRepository();
     FirebaseAuth user = FirebaseAuth.instance;
-    String userEmail = user.currentUser!.email ?? "A";
-    String initial = userEmail[0].toUpperCase();
+    String userEmail = user.currentUser!.email ?? "Invalid";
+    String initialEmailLetter = userEmail[0].toUpperCase();
     return AppBar(
+      backgroundColor: AppStyle.bgColor,
       automaticallyImplyLeading: false,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CircleAvatar(
-            child: Text(initial),
+            child: Text(initialEmailLetter),
           ),
           _signOutButton(),
         ],
@@ -121,8 +122,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _signOutButton() {
     return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed)) {
+              return Theme.of(context).colorScheme.primary.withOpacity(0.5);
+            }
+            return AppStyle.mainColor;
+          },
+        ),
+      ),
       onPressed: signOut,
-      child: const Text('Sign Out'),
+      child: Icon(Icons.exit_to_app),
     );
   }
 }
