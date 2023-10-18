@@ -13,10 +13,11 @@ class NoteEditorScreen extends StatefulWidget {
 }
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
+  // ignore: non_constant_identifier_names
   int color_id = Random().nextInt(AppStyle.cardsColor.length);
   String date = DateTime.now().toString();
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _mainController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _mainController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
@@ -75,9 +76,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             "color_id": color_id,
             "creator_id": user.currentUser!.uid,
           }).then((value) {
-            print(value.id);
             Navigator.pop(context);
           }).catchError(
+              // ignore: invalid_return_type_for_catch_error, avoid_print
               (error) => print("Failed to add new Note due to $error"));
         },
         child: const Icon(Icons.save),

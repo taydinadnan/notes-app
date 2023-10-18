@@ -1,95 +1,10 @@
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/material.dart';
-// import 'package:notes_app/model/note.dart';
-// import 'package:notes_app/provider/auth_provider.dart';
-// import 'package:notes_app/repository/user_data_repository.dart';
-// import 'package:notes_app/repository/widget_tree.dart';
-// import 'package:notes_app/view/note/note_card.dart';
-
-// class HomeScreen extends StatefulWidget {
-//   const HomeScreen({super.key});
-
-//   @override
-//   State<HomeScreen> createState() => _HomeScreenState();
-// }
-
-// class _HomeScreenState extends State<HomeScreen> {
-//   late final FirebaseAuth? user;
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: buildAppBar(),
-//       backgroundColor: Colors.red,
-//       body: Column(
-//         children: [
-//           // NotesCard(
-//           //   noteData: NoteModel(
-//           //       title: "Title",
-//           //       note:
-//           //           'This is a test nite for testing,This is a test nite for testinggThis is a test nite for testinggThis is a test nite for testingg',
-//           //       color: Colors.yellow,
-//           //       creatorId: "test"),
-//           // ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   AppBar buildAppBar() {
-//     final UserDataRepository repository = UserDataRepository();
-//     return AppBar(
-//       title: Row(
-//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//         children: [
-//           // FutureBuilder<Map<String, dynamic>?>(
-//           //   future: repository.getUserData(user!.uid),
-//           //   builder: (context, snapshot) {
-//           //     if (snapshot.connectionState == ConnectionState.waiting) {
-//           //       return const CircularProgressIndicator();
-//           //     } else if (snapshot.hasError) {
-//           //       return Text('Error: ${snapshot.error}');
-//           //     } else {
-//           //       final userData = snapshot.data;
-//           //       final username = userData?['username'] ?? 'User';
-//           //       final usernameCapitalized = username.isNotEmpty
-//           //           ? username[0].toUpperCase() + username.substring(1)
-//           //           : username;
-
-//           //       return Text('$usernameCapitalized',
-//           //           style: const TextStyle(fontSize: 20));
-//           //     }
-//           //   },
-//           // ),
-//           _signOutButton(),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Future<void> signOut() async {
-//     await Auth().signOut();
-//     // ignore: use_build_context_synchronously
-//     Navigator.push(
-//         context, MaterialPageRoute(builder: (context) => const WidgetTree()));
-//   }
-
-//   Widget _signOutButton() {
-//     return ElevatedButton(
-//       onPressed: signOut,
-//       child: const Text('Sign Out'),
-//     );
-//   }
-// }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/provider/auth_provider.dart';
-import 'package:notes_app/repository/user_data_repository.dart';
-import 'package:notes_app/repository/widget_tree.dart';
+import 'package:notes_app/widget_tree.dart';
 import 'package:notes_app/view/note/note_card.dart';
 import 'package:notes_app/view/note/note_editor.dart';
 import 'package:notes_app/view/note/note_reader.dart';
@@ -179,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   AppBar buildAppBar() {
-    final UserDataRepository repository = UserDataRepository();
+    // final UserDataRepository repository = UserDataRepository();
     return AppBar(
       automaticallyImplyLeading: false,
       title: Row(

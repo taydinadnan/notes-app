@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/provider/firebase_authentication.dart';
-import 'package:notes_app/repository/widget_tree.dart';
+import 'package:notes_app/widget_tree.dart';
 import 'package:notes_app/view/auth/widgets/auth_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

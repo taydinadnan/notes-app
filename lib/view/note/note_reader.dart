@@ -3,11 +3,11 @@ import 'package:notes_app/app_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NoteReaderScreen extends StatefulWidget {
-  NoteReaderScreen(this.doc, {Key? key}) : super(key: key);
+  const NoteReaderScreen(this.doc, {Key? key}) : super(key: key);
   final QueryDocumentSnapshot doc;
 
   @override
-  _NoteReaderScreenState createState() => _NoteReaderScreenState();
+  State createState() => _NoteReaderScreenState();
 }
 
 class _NoteReaderScreenState extends State<NoteReaderScreen> {
@@ -46,7 +46,6 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
 
     docRef.update(updatedData).then((_) {
       print("Document updated successfully.");
-      toggleEditing();
     }).catchError((error) {
       print("Failed to update document: $error");
     });
