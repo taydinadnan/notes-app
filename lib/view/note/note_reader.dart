@@ -51,6 +51,18 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
     });
   }
 
+  void deleteNoteFromFirestore() {
+    DocumentReference docRef =
+        FirebaseFirestore.instance.collection("Notes").doc(widget.doc.id);
+
+    docRef.delete().then((_) {
+      print("Document deleted successfully.");
+      Navigator.pop(context);
+    }).catchError((error) {
+      print("Failed to delete document: $error");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     int color_id = widget.doc['color_id'];
@@ -59,18 +71,6 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
       appBar: AppBar(
         backgroundColor: AppStyle.cardsColor[color_id],
         elevation: 0.0,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(isEditing ? Icons.save : Icons.edit),
-            onPressed: () {
-              if (isEditing) {
-                // Save the changes to Firestore
-                updateNoteInFirestore();
-              }
-              toggleEditing();
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -108,6 +108,33 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
                   ),
           ],
         ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            backgroundColor: AppStyle.buttonColor,
+            onPressed: () {
+              //Delete function here
+              deleteNoteFromFirestore();
+            },
+            child: const Icon(Icons.delete),
+          ),
+          const SizedBox(
+            height: 15,
+          ),
+          FloatingActionButton(
+            backgroundColor: isEditing ? Colors.green : AppStyle.buttonColor,
+            onPressed: () {
+              if (isEditing) {
+                // Save the changes to Firestore
+                updateNoteInFirestore();
+              }
+              toggleEditing();
+            },
+            child: Icon(isEditing ? Icons.save : Icons.edit),
+          ),
+        ],
       ),
     );
   }
