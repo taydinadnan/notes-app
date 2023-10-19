@@ -19,7 +19,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen>
     with TickerProviderStateMixin {
-  bool isAnimatingIn = false;
+  bool isAnimatingIn = true;
   String? errorMessage = '';
   bool isLoading = false;
   final TextEditingController _emailController = TextEditingController();
@@ -79,18 +79,46 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
   Widget _buildLoginButton() {
     return TextButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
+      onPressed: () async {
+        setState(() {
+          isAnimatingIn = true;
+        });
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // ignore: use_build_context_synchronously
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const LoginScreen();
+            },
           ),
         );
         _emailController.clear();
         _passwordController.clear();
+        setState(() {
+          isAnimatingIn = false;
+        });
       },
       child: const Text('Already have an account? Login'),
     );
+  }
+
+  void animateContainers() async {
+    setState(() {
+      isAnimatingIn = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    setState(() {
+      isAnimatingIn = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    animateContainers();
   }
 
   @override
@@ -99,9 +127,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       backgroundColor: AppStyle.mainColor,
       body: Stack(
         children: [
-          TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
           buildSignUp(context),
           const AnimatedBackGround(),
+          TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
           BottomSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
         ],
       ),

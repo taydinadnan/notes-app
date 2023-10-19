@@ -64,12 +64,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         setState(() {
           isAnimatingIn = true;
         });
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(milliseconds: 100));
         // ignore: use_build_context_synchronously
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const RegisterScreen(),
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const RegisterScreen();
+            },
           ),
         );
         _passwordController.clear();
@@ -87,7 +88,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       isAnimatingIn = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     setState(() {
       isAnimatingIn = false;
@@ -107,8 +108,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       body: Stack(
         children: [
           buildLogin(),
-          TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
           const AnimatedBackGround(),
+          TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
           BottomSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
         ],
       ),
