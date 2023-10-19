@@ -85,20 +85,33 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           FloatingActionButton(
             backgroundColor: AppStyle.accentColor,
             onPressed: () {
-              FirebaseFirestore.instance.collection("Notes").add({
-                "note_title": _titleController.text,
-                "creation_date": date,
-                "note_content": _mainController.text,
-                "color_id": color_id,
-                "creator_id": user.currentUser!.uid,
-              }).then((value) {
-                Navigator.pop(context);
-              }).catchError(
-                  // ignore: invalid_return_type_for_catch_error, avoid_print
-                  (error) => print("Failed to add new Note due to $error"));
+              final title = _titleController.text;
+              final content = _mainController.text;
+
+              if (title.isNotEmpty && content.isNotEmpty) {
+                FirebaseFirestore.instance.collection("Notes").add({
+                  "note_title": title,
+                  "creation_date": date,
+                  "note_content": content,
+                  "color_id": color_id,
+                  "creator_id": user.currentUser!.uid,
+                }).then((value) {
+                  Navigator.pop(context);
+                }).catchError((error) {
+                  // Handle the error
+                  print("Failed to add new Note due to $error");
+                });
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content:
+                        Text('Please fill in both the title and note content.'),
+                  ),
+                );
+              }
             },
             child: const Icon(Icons.save),
-          ),
+          )
         ],
       ),
     );

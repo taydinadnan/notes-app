@@ -127,13 +127,24 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
             backgroundColor: isEditing ? Colors.green : AppStyle.buttonColor,
             onPressed: () {
               if (isEditing) {
-                // Save the changes to Firestore
-                updateNoteInFirestore();
+                final updatedTitle = titleController.text;
+                final updatedContent = contentController.text;
+
+                if (updatedTitle.isNotEmpty && updatedContent.isNotEmpty) {
+                  updateNoteInFirestore();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Both the title and note content must be filled in to save.'),
+                    ),
+                  );
+                }
               }
               toggleEditing();
             },
             child: Icon(isEditing ? Icons.save : Icons.edit),
-          ),
+          )
         ],
       ),
     );
