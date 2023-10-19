@@ -1,11 +1,14 @@
-import 'package:animated_background/animated_background.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/provider/firebase_authentication.dart';
 import 'package:notes_app/view/auth/register_screen.dart';
+import 'package:notes_app/view/auth/widgets/animated_back_ground.dart';
 import 'package:notes_app/view/auth/widgets/auth_widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:notes_app/view/auth/widgets/bottom_slide_animation.dart';
+import 'package:notes_app/view/auth/widgets/top_slide_animation.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +19,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen>
     with TickerProviderStateMixin {
+  bool isAnimatingIn = false;
   String? errorMessage = '';
   bool isLoading = false;
   final TextEditingController _emailController = TextEditingController();
@@ -54,9 +58,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
-  Widget _buildRegisterButton() {
+  Widget _buildRegisterButton(BuildContext context) {
     return TextButton(
-      onPressed: () {
+      onPressed: () async {
+        setState(() {
+          isAnimatingIn = true;
+        });
+        await Future.delayed(const Duration(seconds: 1));
+        // ignore: use_build_context_synchronously
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -65,9 +74,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         );
         _passwordController.clear();
         _emailController.clear();
+        setState(() {
+          isAnimatingIn = false;
+        });
       },
       child: const Text('Create an account'),
     );
+  }
+
+  void animateContainers() async {
+    setState(() {
+      isAnimatingIn = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() {
+      isAnimatingIn = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    animateContainers();
   }
 
   @override
@@ -76,43 +106,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       backgroundColor: AppStyle.mainColor,
       body: Stack(
         children: [
-          Image.asset("assets/top.png"),
           buildLogin(),
-          animatedBackGround(),
-          Positioned(
-            bottom: 1,
-            child: RotatedBox(
-              quarterTurns: 2,
-              child: Image.asset(
-                "assets/top.png",
-                width: MediaQuery.of(context).size.width,
-              ),
-            ),
-          ),
+          TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
+          const AnimatedBackGround(),
+          BottomSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
         ],
-      ),
-    );
-  }
-
-  Opacity animatedBackGround() {
-    return Opacity(
-      opacity: 0.5,
-      child: AnimatedBackground(
-        vsync: this,
-        behaviour: RandomParticleBehaviour(
-            options: const ParticleOptions(
-              spawnOpacity: 0.0,
-              opacityChangeRate: 0.25,
-              minOpacity: 0.1,
-              maxOpacity: 0.4,
-              spawnMinSpeed: 30.0,
-              spawnMaxSpeed: 70.0,
-              spawnMinRadius: 7.0,
-              spawnMaxRadius: 15.0,
-              particleCount: 40,
-            ),
-            paint: particlePaint),
-        child: const SizedBox(),
       ),
     );
   }
@@ -133,14 +131,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             _buildLoginButton(),
             const SizedBox(height: 20),
             buildErrorMessage(errorMessage),
-            _buildRegisterButton(),
+            _buildRegisterButton(context),
           ],
         ),
       ),
     );
   }
-
-  var particlePaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0;
 }

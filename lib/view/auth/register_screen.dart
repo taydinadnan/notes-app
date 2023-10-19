@@ -1,8 +1,11 @@
-import 'package:animated_background/animated_background.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/provider/firebase_authentication.dart';
+import 'package:notes_app/view/auth/login_screen.dart';
+import 'package:notes_app/view/auth/widgets/animated_back_ground.dart';
+import 'package:notes_app/view/auth/widgets/bottom_slide_animation.dart';
+import 'package:notes_app/view/auth/widgets/top_slide_animation.dart';
 import 'package:notes_app/widget_tree.dart';
 import 'package:notes_app/view/auth/widgets/auth_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +19,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen>
     with TickerProviderStateMixin {
+  bool isAnimatingIn = false;
   String? errorMessage = '';
   bool isLoading = false;
   final TextEditingController _emailController = TextEditingController();
@@ -73,49 +77,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     );
   }
 
+  Widget _buildLoginButton() {
+    return TextButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+        _emailController.clear();
+        _passwordController.clear();
+      },
+      child: const Text('Already have an account? Login'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppStyle.mainColor,
       body: Stack(
         children: [
-          Image.asset("assets/top.png"),
+          TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
           buildSignUp(context),
-          animatedBackGround(),
-          Positioned(
-            bottom: 1,
-            child: RotatedBox(
-              quarterTurns: 2,
-              child: Image.asset(
-                "assets/top.png",
-                width: MediaQuery.of(context).size.width,
-              ),
-            ),
-          ),
+          const AnimatedBackGround(),
+          BottomSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
         ],
-      ),
-    );
-  }
-
-  Opacity animatedBackGround() {
-    return Opacity(
-      opacity: 0.5,
-      child: AnimatedBackground(
-        vsync: this,
-        behaviour: RandomParticleBehaviour(
-            options: const ParticleOptions(
-              spawnOpacity: 0.0,
-              opacityChangeRate: 0.25,
-              minOpacity: 0.1,
-              maxOpacity: 0.4,
-              spawnMinSpeed: 30.0,
-              spawnMaxSpeed: 70.0,
-              spawnMinRadius: 7.0,
-              spawnMaxRadius: 15.0,
-              particleCount: 40,
-            ),
-            paint: particlePaint),
-        child: const SizedBox(),
       ),
     );
   }
@@ -142,22 +130,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
             const SizedBox(height: 20),
             buildErrorMessage(errorMessage),
             _buildRegistrationButton(),
+            _buildLoginButton(),
             const SizedBox(height: 20),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _emailController.clear();
-                _passwordController.clear();
-              },
-              child: const Text('Already have an account? Login'),
-            ),
           ],
         ),
       ),
     );
   }
-
-  var particlePaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.0;
 }
