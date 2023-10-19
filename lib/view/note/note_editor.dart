@@ -29,7 +29,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         elevation: 0.0,
         iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
-          'Add a new Nore',
+          'Add a new Note',
           style: TextStyle(color: Colors.black),
         ),
       ),
@@ -67,22 +67,39 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppStyle.accentColor,
-        onPressed: () {
-          FirebaseFirestore.instance.collection("Notes").add({
-            "note_title": _titleController.text,
-            "creation_date": date,
-            "note_content": _mainController.text,
-            "color_id": color_id,
-            "creator_id": user.currentUser!.uid,
-          }).then((value) {
-            Navigator.pop(context);
-          }).catchError(
-              // ignore: invalid_return_type_for_catch_error, avoid_print
-              (error) => print("Failed to add new Note due to $error"));
-        },
-        child: const Icon(Icons.save),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          SizedBox(
+            height: 50,
+            width: 50,
+            child: FloatingActionButton(
+              backgroundColor: AppStyle.accentColor,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.cancel),
+            ),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            backgroundColor: AppStyle.accentColor,
+            onPressed: () {
+              FirebaseFirestore.instance.collection("Notes").add({
+                "note_title": _titleController.text,
+                "creation_date": date,
+                "note_content": _mainController.text,
+                "color_id": color_id,
+                "creator_id": user.currentUser!.uid,
+              }).then((value) {
+                Navigator.pop(context);
+              }).catchError(
+                  // ignore: invalid_return_type_for_catch_error, avoid_print
+                  (error) => print("Failed to add new Note due to $error"));
+            },
+            child: const Icon(Icons.save),
+          ),
+        ],
       ),
     );
   }

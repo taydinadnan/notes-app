@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   FirebaseAuth user = FirebaseAuth.instance;
+  int color_id = Random().nextInt(AppStyle.cardsColor.length);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,14 +63,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisCount: 2,
                       ),
                       children: snapshot.data!.docs
-                          .map((note) => noteCard(() {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          NoteReaderScreen(note),
-                                    ));
-                              }, note))
+                          .map((note) => OpenContainer(
+                                closedElevation: 0,
+                                transitionType: ContainerTransitionType.fade,
+                                tappable: false,
+                                closedColor: AppStyle.bgColor,
+                                closedShape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero),
+                                closedBuilder: (context, action) {
+                                  return noteCard(() {
+                                    action();
+                                  }, note);
+                                },
+                                openBuilder: (
+                                  BuildContext _,
+                                  CloseContainerActionCallback closeContainer,
+                                ) {
+                                  return NoteReaderScreen(note);
+                                },
+                              ))
                           .toList(),
                     );
                   }
@@ -80,21 +95,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppStyle.buttonColor,
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const NoteEditorScreen()));
+      floatingActionButton: OpenContainer(
+        openElevation: 4,
+        transitionType: ContainerTransitionType.fade,
+        closedElevation: 0,
+        tappable: false,
+        closedColor: AppStyle.cardsColor[color_id],
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(16),
+          ),
+        ),
+        closedBuilder: (context, action) {
+          return FloatingActionButton(
+            backgroundColor: AppStyle.buttonColor,
+            onPressed: action,
+            child: const Icon(Icons.add),
+          );
         },
-        child: const Icon(Icons.add),
+        openBuilder: (
+          BuildContext _,
+          CloseContainerActionCallback closeContainer,
+        ) {
+          return const NoteEditorScreen();
+        },
       ),
     );
   }
 
   AppBar buildAppBar() {
-    // final UserDataRepository repository = UserDataRepository();
     FirebaseAuth user = FirebaseAuth.instance;
     String userEmail = user.currentUser!.email ?? "Invalid";
     String initialEmailLetter = userEmail[0].toUpperCase();
@@ -133,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       onPressed: signOut,
-      child: Icon(Icons.exit_to_app),
+      child: const Icon(Icons.exit_to_app),
     );
   }
 }
