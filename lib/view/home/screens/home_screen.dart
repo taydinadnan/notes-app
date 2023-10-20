@@ -49,48 +49,78 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 20.0,
             ),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: noteRepository.getNotes(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapshot.hasData) {
-                    return GridView(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                      ),
-                      children: snapshot.data!.docs
-                          .map((note) => OpenContainer(
-                                closedElevation: 0,
-                                transitionType: ContainerTransitionType.fade,
-                                tappable: false,
-                                closedColor: AppStyle.bgColor,
-                                closedShape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.zero),
-                                closedBuilder: (context, action) {
-                                  return noteCard(() {
-                                    action();
-                                  }, note);
-                                },
-                                openBuilder: (
-                                  BuildContext _,
-                                  CloseContainerActionCallback closeContainer,
-                                ) {
-                                  return EditNoteScreen(note);
-                                },
-                              ))
-                          .toList(),
-                    );
-                  }
-                  return Text(
-                    "there's no Notes",
-                    style: GoogleFonts.nunito(color: Colors.white),
-                  );
-                },
+              child: Stack(
+                children: [
+                  StreamBuilder<QuerySnapshot>(
+                    stream: noteRepository.getNotes(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                        return GridView(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                          ),
+                          children: snapshot.data!.docs
+                              .map((note) => OpenContainer(
+                                    closedElevation: 0,
+                                    transitionType:
+                                        ContainerTransitionType.fade,
+                                    tappable: false,
+                                    closedColor: AppStyle.bgColor,
+                                    closedShape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.zero,
+                                    ),
+                                    closedBuilder: (context, action) {
+                                      return noteCard(() {
+                                        action();
+                                      }, note);
+                                    },
+                                    openBuilder: (
+                                      BuildContext _,
+                                      CloseContainerActionCallback
+                                          closeContainer,
+                                    ) {
+                                      return EditNoteScreen(note);
+                                    },
+                                  ))
+                              .toList(),
+                        );
+                      } else {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "You don't have any notes yet.\n Tap the '+' button to create your first note.",
+                              style: GoogleFonts.nunito(
+                                  color: AppStyle.titleColor),
+                              textAlign: TextAlign.center,
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(
+                                  left: MediaQuery.of(context).size.width / 2 +
+                                      100),
+                              height: 200,
+                              child: CustomPaint(
+                                size: Size(MediaQuery.of(context).size.width,
+                                    MediaQuery.of(context).size.height),
+                                painter: CurveLinePainter(
+                                  startY: 20.0,
+                                  endX:
+                                      0.0, // Adjust this value to position the ending point of the curve
+                                ),
+                              ),
+                            )
+                          ],
+                        );
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
           ],
@@ -143,5 +173,54 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+}
+
+class CurveLinePainter extends CustomPainter {
+  final double startY;
+  final double endX;
+
+  CurveLinePainter({required this.startY, required this.endX});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppStyle.titleColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final path = Path();
+
+    // Start point
+    path.moveTo(endX, startY);
+
+    // Control point for the curve (you can adjust this for the desired curve)
+    final controlPoint = Offset(endX + 50.0, startY + 50.0);
+
+    // End point (center of the floating action button)
+    final endPoint = Offset(endX, startY + 250.0);
+
+    // Draw a quadratic Bézier curve
+    path.quadraticBezierTo(
+        controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
+
+    canvas.drawPath(path, paint);
+
+    // Draw an arrowhead at the endpoint
+    final arrowPaint = Paint()
+      ..color = AppStyle.titleColor
+      ..style = PaintingStyle.fill;
+
+    final arrowPath = Path();
+    arrowPath.moveTo(endPoint.dx - 12.0, endPoint.dy);
+    arrowPath.lineTo(endPoint.dx + 12.0, endPoint.dy);
+    arrowPath.lineTo(endPoint.dx, endPoint.dy + 20.0);
+
+    canvas.drawPath(arrowPath, arrowPaint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }
