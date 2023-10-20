@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/repository/note_repository.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   const NoteEditorScreen({Key? key}) : super(key: key);
@@ -14,18 +14,18 @@ class NoteEditorScreen extends StatefulWidget {
 }
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
-  // ignore: non_constant_identifier_names
-  int color_id = Random().nextInt(AppStyle.cardsColor.length);
+  int colorId = Random().nextInt(AppStyle.cardsColor.length);
   String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _mainController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;
+  final NoteRepository noteRepository = NoteRepository();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppStyle.cardsColor[color_id],
+      backgroundColor: AppStyle.cardsColor[colorId],
       appBar: AppBar(
-        backgroundColor: AppStyle.cardsColor[color_id],
+        backgroundColor: AppStyle.cardsColor[colorId],
         elevation: 0.0,
         iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
@@ -89,18 +89,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               final content = _mainController.text;
 
               if (title.isNotEmpty && content.isNotEmpty) {
-                FirebaseFirestore.instance.collection("Notes").add({
-                  "note_title": title,
-                  "creation_date": date,
-                  "note_content": content,
-                  "color_id": color_id,
-                  "creator_id": user.currentUser!.uid,
-                }).then((value) {
-                  Navigator.pop(context);
-                }).catchError((error) {
-                  // Handle the error
-                  print("Failed to add new Note due to $error");
-                });
+                noteRepository.addNote(title, content, colorId);
+                Navigator.pop(context);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

@@ -22,27 +22,7 @@ class UserDataRepository {
     }
   }
 
-  // Future<Map<String, dynamic>?> getUserData(String userUID) async {
-  //   try {
-  //     final userDocument =
-  //         await firestore.collection('users').doc(userUID).get();
-  //     if (userDocument.exists) {
-  //       return userDocument.data() as Map<String, dynamic>;
-  //     }
-  //   } catch (e) {
-  //     print("Error retrieving user data: $e");
-  //   }
-  //   return null;
-  // }
-
-  // Future<List<Map<String, dynamic>>> getAllUsers() async {
-  //   try {
-  //     final usersCollection = firestore.collection('users');
-  //     final querySnapshot = await usersCollection.get();
-  //     return querySnapshot.docs.map((doc) => doc.data()).toList();
-  //   } catch (e) {
-  //     print("Error retrieving all users: $e");
-  //     return [];
-  //   }
-  // }
+  Stream<QuerySnapshot> getUsers() {
+    return firestore.collection('users').snapshots();
+  }
 }

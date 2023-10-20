@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/provider/auth_provider.dart';
+import 'package:notes_app/repository/note_repository.dart';
+import 'package:notes_app/view/home/widgets/drawer.dart';
 import 'package:notes_app/widget_tree.dart';
 import 'package:notes_app/view/note/note_card.dart';
 import 'package:notes_app/view/note/note_editor.dart';
@@ -20,11 +22,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   FirebaseAuth user = FirebaseAuth.instance;
-  int color_id = Random().nextInt(AppStyle.cardsColor.length);
+  final NoteRepository noteRepository = NoteRepository();
+  int colorId = Random().nextInt(AppStyle.cardsColor.length);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
       appBar: buildAppBar(),
       body: Padding(
@@ -46,10 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection("Notes")
-                    .where("creator_id", isEqualTo: user.currentUser!.uid)
-                    .snapshots(),
+                stream: noteRepository.getNotes(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
@@ -100,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
         transitionType: ContainerTransitionType.fade,
         closedElevation: 0,
         tappable: false,
-        closedColor: AppStyle.cardsColor[color_id],
+        closedColor: AppStyle.cardsColor[colorId],
         closedShape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(16),
@@ -133,8 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CircleAvatar(
-            child: Text(initialEmailLetter),
+          GestureDetector(
+            onTap: () => _scaffoldKey.currentState!.openDrawer(),
+            child: CircleAvatar(
+              child: Text(initialEmailLetter),
+            ),
           ),
           _signOutButton(),
         ],
