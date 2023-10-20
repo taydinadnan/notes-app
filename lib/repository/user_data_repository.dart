@@ -25,4 +25,8 @@ class UserDataRepository {
   Stream<QuerySnapshot> getUsers() {
     return firestore.collection('users').snapshots();
   }
+
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
 }

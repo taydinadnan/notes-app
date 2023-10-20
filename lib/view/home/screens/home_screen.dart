@@ -6,10 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app/app_style.dart';
-import 'package:notes_app/provider/auth_provider.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/view/home/widgets/drawer.dart';
-import 'package:notes_app/widget_tree.dart';
 import 'package:notes_app/view/note/note_card.dart';
 import 'package:notes_app/view/note/note_editor.dart';
 import 'package:notes_app/view/note/note_reader.dart';
@@ -142,33 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(initialEmailLetter),
             ),
           ),
-          _signOutButton(),
         ],
       ),
-    );
-  }
-
-  Future<void> signOut() async {
-    await Auth().signOut();
-    // ignore: use_build_context_synchronously
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const WidgetTree()));
-  }
-
-  Widget _signOutButton() {
-    return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed)) {
-              return Theme.of(context).colorScheme.primary.withOpacity(0.5);
-            }
-            return AppStyle.mainColor;
-          },
-        ),
-      ),
-      onPressed: signOut,
-      child: const Icon(Icons.exit_to_app),
     );
   }
 }

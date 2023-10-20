@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/widget_tree.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -13,7 +14,8 @@ class MyDrawer extends StatelessWidget {
     FirebaseAuth user = FirebaseAuth.instance;
     final NoteRepository noteRepository = NoteRepository();
     final UserDataRepository userDataRepository = UserDataRepository();
-
+    String userEmail = user.currentUser!.email ?? "Invalid";
+    String initialEmailLetter = userEmail[0].toUpperCase();
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -21,11 +23,11 @@ class MyDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             accountName: getUserName(userDataRepository, user),
             accountEmail: Text(user.currentUser!.email!),
-            currentAccountPicture: const CircleAvatar(
+            currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                'U',
-                style: TextStyle(fontSize: 40.0),
+                initialEmailLetter,
+                style: const TextStyle(fontSize: 40.0),
               ),
             ),
             decoration: BoxDecoration(color: AppStyle.noteAppColor),
@@ -34,8 +36,11 @@ class MyDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
-            onTap: () {
-              Navigator.pop(context);
+            onTap: () async {
+              await UserDataRepository().signOut();
+              // ignore: use_build_context_synchronously
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const WidgetTree()));
             },
           ),
         ],
