@@ -21,7 +21,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final TextEditingController _mainController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
-  final int newColorId = 0;
+  // final int newColorId = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

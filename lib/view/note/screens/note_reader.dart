@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:notes_app/view/note/widgets/color_picker.dart';
 
 class NoteReaderScreen extends StatefulWidget {
   const NoteReaderScreen(this.doc, {Key? key}) : super(key: key);
@@ -13,6 +14,7 @@ class NoteReaderScreen extends StatefulWidget {
 class _NoteReaderScreenState extends State<NoteReaderScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
+  late int colorId; // Define colorId at the class level
   bool isEditing = false;
 
   @override
@@ -20,6 +22,7 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
     super.initState();
     titleController.text = widget.doc["note_title"];
     contentController.text = widget.doc["note_content"];
+    colorId = widget.doc['color_id']; // Initialize colorId
   }
 
   @override
@@ -42,6 +45,7 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
     Map<String, dynamic> updatedData = {
       "note_title": titleController.text,
       "note_content": contentController.text,
+      "color_id": colorId, // Update color_id in Firestore
     };
 
     docRef.update(updatedData).then((_) {
@@ -65,7 +69,6 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    int colorId = widget.doc['color_id'];
     return Scaffold(
       backgroundColor: AppStyle.cardsColor[colorId],
       appBar: AppBar(
@@ -77,6 +80,20 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (isEditing)
+              Center(
+                child: ColorPicker(
+                  colors: AppStyle.cardsColor,
+                  selectedColorIndex: colorId,
+                  onColorSelected: (int newColorId) {
+                    setState(() {
+                      colorId = newColorId; // Update colorId
+                      print('New selected index $newColorId');
+                      print('Current color id $colorId');
+                    });
+                  },
+                ),
+              ),
             isEditing
                 ? TextFormField(
                     controller: titleController,
@@ -115,7 +132,7 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
           FloatingActionButton(
             backgroundColor: AppStyle.buttonColor,
             onPressed: () {
-              //Delete function here
+              // Delete function here
               deleteNoteFromFirestore();
             },
             child: const Icon(Icons.delete),
