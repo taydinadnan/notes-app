@@ -7,14 +7,14 @@ import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/view/note/widgets/color_picker.dart';
 
-class NoteEditorScreen extends StatefulWidget {
-  const NoteEditorScreen({Key? key}) : super(key: key);
+class CreateNoteScreen extends StatefulWidget {
+  const CreateNoteScreen({Key? key}) : super(key: key);
 
   @override
-  State<NoteEditorScreen> createState() => _NoteEditorScreenState();
+  State<CreateNoteScreen> createState() => _CreateNoteScreenState();
 }
 
-class _NoteEditorScreenState extends State<NoteEditorScreen> {
+class _CreateNoteScreenState extends State<CreateNoteScreen> {
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
   String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
   final TextEditingController _titleController = TextEditingController();

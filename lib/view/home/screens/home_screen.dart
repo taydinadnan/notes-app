@@ -8,9 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/view/home/widgets/drawer.dart';
+import 'package:notes_app/view/note/screens/edit_note.dart';
 import 'package:notes_app/view/note/screens/note_card.dart';
-import 'package:notes_app/view/note/screens/note_editor.dart';
-import 'package:notes_app/view/note/screens/note_reader.dart';
+import 'package:notes_app/view/note/screens/create_note.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   BuildContext _,
                                   CloseContainerActionCallback closeContainer,
                                 ) {
-                                  return NoteReaderScreen(note);
+                                  return EditNoteScreen(note);
                                 },
                               ))
                           .toList(),
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BuildContext _,
           CloseContainerActionCallback closeContainer,
         ) {
-          return const NoteEditorScreen();
+          return const CreateNoteScreen();
         },
       ),
     );

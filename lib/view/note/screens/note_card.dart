@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 
-Widget noteCard(Function()? onTap, QueryDocumentSnapshot doc) {
+Widget noteCard(
+  Function()? onTap,
+  QueryDocumentSnapshot doc,
+) {
   return InkWell(
     onTap: onTap,
     child: Container(
@@ -15,15 +18,20 @@ Widget noteCard(Function()? onTap, QueryDocumentSnapshot doc) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            doc["note_title"],
-            style: AppStyle.mainTitle,
+          Flexible(
+            child: Text(
+              doc["note_title"],
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              style: AppStyle.mainTitle,
+            ),
           ),
           const SizedBox(
             height: 4.0,
           ),
           Text(
             doc["creation_date"],
+            overflow: TextOverflow.ellipsis,
             style: AppStyle.dateTitle,
           ),
           const SizedBox(

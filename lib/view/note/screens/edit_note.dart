@@ -3,26 +3,26 @@ import 'package:notes_app/app_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:notes_app/view/note/widgets/color_picker.dart';
 
-class NoteReaderScreen extends StatefulWidget {
-  const NoteReaderScreen(this.doc, {Key? key}) : super(key: key);
+class EditNoteScreen extends StatefulWidget {
+  const EditNoteScreen(this.doc, {Key? key}) : super(key: key);
   final QueryDocumentSnapshot doc;
 
   @override
-  State createState() => _NoteReaderScreenState();
+  State createState() => _EditNoteScreenState();
 }
 
-class _NoteReaderScreenState extends State<NoteReaderScreen> {
+class _EditNoteScreenState extends State<EditNoteScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
-  late int colorId; // Define colorId at the class level
-  bool isEditing = false;
+  late int colorId;
+  bool isEditing = true;
 
   @override
   void initState() {
     super.initState();
     titleController.text = widget.doc["note_title"];
     contentController.text = widget.doc["note_content"];
-    colorId = widget.doc['color_id']; // Initialize colorId
+    colorId = widget.doc['color_id'];
   }
 
   @override
@@ -74,6 +74,31 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
       appBar: AppBar(
         backgroundColor: AppStyle.cardsColor[colorId],
         elevation: 0.0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  isEditing = !isEditing;
+                });
+              },
+              icon: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    isEditing ? "Read Mode" : "",
+                    style: TextStyle(fontSize: 11, color: AppStyle.titleColor),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(isEditing
+                      ? Icons.remove_red_eye_outlined
+                      : Icons.remove_red_eye_rounded),
+                ],
+              ),
+            ),
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -129,39 +154,41 @@ class _NoteReaderScreenState extends State<NoteReaderScreen> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            backgroundColor: AppStyle.buttonColor,
-            onPressed: () {
-              // Delete function here
-              deleteNoteFromFirestore();
-            },
-            child: const Icon(Icons.delete),
-          ),
+          if (isEditing)
+            FloatingActionButton(
+              backgroundColor: AppStyle.buttonColor,
+              onPressed: () {
+                // Delete function here
+                deleteNoteFromFirestore();
+              },
+              child: const Icon(Icons.delete),
+            ),
           const SizedBox(
             height: 15,
           ),
-          FloatingActionButton(
-            backgroundColor: isEditing ? Colors.green : AppStyle.buttonColor,
-            onPressed: () {
-              if (isEditing) {
-                final updatedTitle = titleController.text;
-                final updatedContent = contentController.text;
+          if (isEditing)
+            FloatingActionButton(
+              backgroundColor: isEditing ? Colors.green : AppStyle.buttonColor,
+              onPressed: () {
+                if (isEditing) {
+                  final updatedTitle = titleController.text;
+                  final updatedContent = contentController.text;
 
-                if (updatedTitle.isNotEmpty && updatedContent.isNotEmpty) {
-                  updateNoteInFirestore();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          'Both the title and note content must be filled in to save.'),
-                    ),
-                  );
+                  if (updatedTitle.isNotEmpty && updatedContent.isNotEmpty) {
+                    updateNoteInFirestore();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Both the title and note content must be filled in to save.'),
+                      ),
+                    );
+                  }
                 }
-              }
-              toggleEditing();
-            },
-            child: Icon(isEditing ? Icons.save : Icons.edit),
-          )
+                toggleEditing();
+              },
+              child: Icon(isEditing ? Icons.save : Icons.edit),
+            )
         ],
       ),
     );
