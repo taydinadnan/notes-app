@@ -8,9 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/view/home/widgets/drawer.dart';
-import 'package:notes_app/view/note/note_card.dart';
-import 'package:notes_app/view/note/note_editor.dart';
-import 'package:notes_app/view/note/note_reader.dart';
+import 'package:notes_app/view/note/screens/note_card.dart';
+import 'package:notes_app/view/note/screens/note_editor.dart';
+import 'package:notes_app/view/note/screens/note_reader.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

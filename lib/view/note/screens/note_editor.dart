@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
+import 'package:notes_app/view/note/widgets/color_picker.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   const NoteEditorScreen({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final TextEditingController _mainController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
+  final int newColorId = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,9 +30,18 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         backgroundColor: AppStyle.cardsColor[colorId],
         elevation: 0.0,
         iconTheme: const IconThemeData(color: Colors.black),
-        title: const Text(
-          'Add a new Note',
-          style: TextStyle(color: Colors.black),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Add a new Note',
+              style: TextStyle(color: Colors.black),
+            ),
+            Text(
+              date,
+              style: AppStyle.dateTitle,
+            ),
+          ],
         ),
       ),
       body: Padding(
@@ -38,32 +49,41 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: ColorPicker(
+                colors: AppStyle.cardsColor,
+                selectedColorIndex:
+                    colorId, // Pass the current colorId as the selectedColorIndex
+                onColorSelected: (int newColorId) {
+                  setState(() {
+                    colorId =
+                        newColorId; // Update the colorId when a new color is selected
+                    print(newColorId);
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                  border: InputBorder.none, hintText: 'Note Title;'),
+              decoration: InputDecoration(
+                  border: InputBorder.none,
+                  labelStyle: AppStyle.mainTitle,
+                  label: const Text("Title:")),
               style: AppStyle.mainTitle,
             ),
-            const SizedBox(
-              height: 8.0,
-            ),
-            Text(
-              date,
-              style: AppStyle.dateTitle,
-            ),
-            const SizedBox(
-              height: 28.0,
-            ),
+            const SizedBox(height: 28.0),
             TextField(
               controller: _mainController,
               keyboardType: TextInputType.multiline,
               maxLines: null,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Note Content',
+                label: const Text("Note Content:"),
+                labelStyle: AppStyle.mainTitle,
               ),
               style: AppStyle.mainContent,
-            )
+            ),
           ],
         ),
       ),

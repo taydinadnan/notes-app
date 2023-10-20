@@ -21,7 +21,6 @@ class AppStyle {
     const Color(0xFFb8ffc7),
     const Color(0xFFffca75),
     const Color(0xFFff9f6b),
-    const Color(0xFFffca75),
   ];
 
   ///setting the text style
