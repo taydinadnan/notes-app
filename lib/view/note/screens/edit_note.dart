@@ -72,6 +72,12 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     return Scaffold(
       backgroundColor: AppStyle.cardsColor[colorId],
       appBar: AppBar(
+        title: Text(
+          isEditing
+              ? titleController.text.toUpperCase()
+              : widget.doc["creation_date"],
+          style: AppStyle.dateTitle,
+        ),
         backgroundColor: AppStyle.cardsColor[colorId],
         elevation: 0.0,
         actions: [
@@ -90,7 +96,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                     isEditing ? "Read Mode" : "",
                     style: TextStyle(fontSize: 11, color: AppStyle.titleColor),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: isEditing ? 8 : 0),
                   Icon(isEditing
                       ? Icons.remove_red_eye_outlined
                       : Icons.remove_red_eye_rounded),
@@ -131,10 +137,11 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
             const SizedBox(
               height: 4.0,
             ),
-            Text(
-              widget.doc["creation_date"],
-              style: AppStyle.dateTitle,
-            ),
+            if (isEditing)
+              Text(
+                widget.doc["creation_date"],
+                style: AppStyle.dateTitle,
+              ),
             const SizedBox(
               height: 28.0,
             ),
