@@ -29,6 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final NoteRepository noteRepository = NoteRepository();
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
   bool isTextFieldVisible = false;
+  String filterText = "";
+  bool notesFound = true;
+
+  TextEditingController searchController = TextEditingController();
 
   void toggleTextFieldVisibility() {
     setState(() {
@@ -54,7 +58,60 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  buildNotes(),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: noteRepository.getNotes(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      final filteredNotes = snapshot.data!.docs.where((note) {
+                        String title = note['note_title'];
+                        String content = note['note_content'];
+                        return title.contains(filterText) ||
+                            content.contains(filterText);
+                      }).toList();
+
+                      notesFound = filteredNotes.isNotEmpty;
+
+                      if (filteredNotes.isEmpty) {
+                        return const Center(
+                          child: EmptyNotesStateScreen(),
+                        );
+                      }
+
+                      return GridView(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                        ),
+                        children: filteredNotes
+                            .map((note) => OpenContainer(
+                                  closedElevation: 0,
+                                  transitionType: ContainerTransitionType.fade,
+                                  tappable: false,
+                                  closedColor: AppStyle.bgColor,
+                                  closedShape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                  closedBuilder: (context, action) {
+                                    return noteCard(() {
+                                      action();
+                                    }, note);
+                                  },
+                                  openBuilder: (
+                                    BuildContext _,
+                                    CloseContainerActionCallback closeContainer,
+                                  ) {
+                                    return EditNoteScreen(note);
+                                  },
+                                ))
+                            .toList(),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -62,50 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: AddNoteButton(colorId: colorId),
-    );
-  }
-
-  StreamBuilder<QuerySnapshot<Object?>> buildNotes() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: noteRepository.getNotes(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-          return GridView(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-            ),
-            children: snapshot.data!.docs
-                .map((note) => OpenContainer(
-                      closedElevation: 0,
-                      transitionType: ContainerTransitionType.fade,
-                      tappable: false,
-                      closedColor: AppStyle.bgColor,
-                      closedShape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      closedBuilder: (context, action) {
-                        return noteCard(() {
-                          action();
-                        }, note);
-                      },
-                      openBuilder: (
-                        BuildContext _,
-                        CloseContainerActionCallback closeContainer,
-                      ) {
-                        return EditNoteScreen(note);
-                      },
-                    ))
-                .toList(),
-          );
-        } else {
-          return const EmptyNotesStateScreen();
-        }
-      },
     );
   }
 
@@ -128,11 +141,16 @@ class _HomeScreenState extends State<HomeScreen> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 100),
           width:
-              isTextFieldVisible ? 0 : MediaQuery.of(context).size.width / 1.5,
+              isTextFieldVisible ? MediaQuery.of(context).size.width / 1.5 : 0,
           padding: const EdgeInsets.all(8.0),
-          child: const TextField(
+          child: TextField(
             maxLines: 1,
-            decoration: InputDecoration(
+            onChanged: (text) {
+              setState(() {
+                filterText = text;
+              });
+            },
+            decoration: const InputDecoration(
               labelText: 'Search',
               isDense: true,
             ),
@@ -141,7 +159,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           children: [
             IconButton(
-              onPressed: toggleTextFieldVisibility,
+              onPressed: () {
+                toggleTextFieldVisibility();
+                filterText = '';
+              },
               icon: const Icon(Icons.search),
             ),
           ],

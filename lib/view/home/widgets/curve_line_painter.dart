@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/app_style.dart';
 
 class CurveLinePainter extends CustomPainter {
   final double startY;
@@ -10,7 +9,7 @@ class CurveLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppStyle.titleColor
+      ..color = const Color.fromARGB(255, 230, 189, 238)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -18,9 +17,9 @@ class CurveLinePainter extends CustomPainter {
 
     path.moveTo(endX, startY);
 
-    final controlPoint = Offset(endX + 50.0, startY + 50.0);
+    final controlPoint = Offset(endX + 50.0, startY + 10.0);
 
-    final endPoint = Offset(endX, startY + 250.0);
+    final endPoint = Offset(endX + 20, startY + 100.0);
 
     path.quadraticBezierTo(
         controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
@@ -28,7 +27,7 @@ class CurveLinePainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     final arrowPaint = Paint()
-      ..color = AppStyle.titleColor
+      ..color = const Color.fromARGB(255, 230, 189, 238)
       ..style = PaintingStyle.fill;
 
     final arrowPath = Path();
