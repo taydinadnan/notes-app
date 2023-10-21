@@ -4,15 +4,17 @@ import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/app_text.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/home/widgets/add_note_button.dart';
 import 'package:notes_app/view/home/widgets/drawer.dart';
+import 'package:notes_app/view/home/widgets/empty_notes_state_screen.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
 import 'package:notes_app/view/note/screens/note_card.dart';
-import 'package:notes_app/view/note/screens/create_note.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -26,6 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
   FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
+  bool isTextFieldVisible = false;
+
+  void toggleTextFieldVisibility() {
+    setState(() {
+      isTextFieldVisible = !isTextFieldVisible;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,120 +49,63 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Your recent Notes",
-              style: GoogleFonts.roboto(
-                color: AppStyle.titleColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-            const SizedBox(
-              height: 20.0,
-            ),
+            yourRecentNotes,
+            spacingBig,
             Expanded(
               child: Stack(
                 children: [
-                  StreamBuilder<QuerySnapshot>(
-                    stream: noteRepository.getNotes(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                        return GridView(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                          ),
-                          children: snapshot.data!.docs
-                              .map((note) => OpenContainer(
-                                    closedElevation: 0,
-                                    transitionType:
-                                        ContainerTransitionType.fade,
-                                    tappable: false,
-                                    closedColor: AppStyle.bgColor,
-                                    closedShape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.zero,
-                                    ),
-                                    closedBuilder: (context, action) {
-                                      return noteCard(() {
-                                        action();
-                                      }, note);
-                                    },
-                                    openBuilder: (
-                                      BuildContext _,
-                                      CloseContainerActionCallback
-                                          closeContainer,
-                                    ) {
-                                      return EditNoteScreen(note);
-                                    },
-                                  ))
-                              .toList(),
-                        );
-                      } else {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "You don't have any notes yet.\n Tap the '+' button to create your first note.",
-                              style: GoogleFonts.nunito(
-                                  color: AppStyle.titleColor),
-                              textAlign: TextAlign.center,
-                            ),
-                            Container(
-                              padding: EdgeInsets.only(
-                                  left: MediaQuery.of(context).size.width / 2 +
-                                      100),
-                              height: 200,
-                              child: CustomPaint(
-                                size: Size(MediaQuery.of(context).size.width,
-                                    MediaQuery.of(context).size.height),
-                                painter: CurveLinePainter(
-                                  startY: 20.0,
-                                  endX:
-                                      0.0, // Adjust this value to position the ending point of the curve
-                                ),
-                              ),
-                            )
-                          ],
-                        );
-                      }
-                    },
-                  ),
+                  buildNotes(),
                 ],
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: OpenContainer(
-        openElevation: 4,
-        transitionType: ContainerTransitionType.fade,
-        closedElevation: 0,
-        tappable: false,
-        closedColor: AppStyle.cardsColor[colorId],
-        closedShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(16),
-          ),
-        ),
-        closedBuilder: (context, action) {
-          return FloatingActionButton(
-            backgroundColor: AppStyle.buttonColor,
-            onPressed: action,
-            child: const Icon(Icons.add),
+      floatingActionButton: AddNoteButton(colorId: colorId),
+    );
+  }
+
+  StreamBuilder<QuerySnapshot<Object?>> buildNotes() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: noteRepository.getNotes(),
+      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
           );
-        },
-        openBuilder: (
-          BuildContext _,
-          CloseContainerActionCallback closeContainer,
-        ) {
-          return const CreateNoteScreen();
-        },
-      ),
+        }
+        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+          return GridView(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+            ),
+            children: snapshot.data!.docs
+                .map((note) => OpenContainer(
+                      closedElevation: 0,
+                      transitionType: ContainerTransitionType.fade,
+                      tappable: false,
+                      closedColor: AppStyle.bgColor,
+                      closedShape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      closedBuilder: (context, action) {
+                        return noteCard(() {
+                          action();
+                        }, note);
+                      },
+                      openBuilder: (
+                        BuildContext _,
+                        CloseContainerActionCallback closeContainer,
+                      ) {
+                        return EditNoteScreen(note);
+                      },
+                    ))
+                .toList(),
+          );
+        } else {
+          return const EmptyNotesStateScreen();
+        }
+      },
     );
   }
 
@@ -166,59 +119,34 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-              onTap: () => _scaffoldKey.currentState!.openDrawer(),
-              child: getUserProfilePicture(userDataRepository, user)),
+            onTap: () => _scaffoldKey.currentState!.openDrawer(),
+            child: getUserProfilePicture(userDataRepository, user),
+          ),
         ],
       ),
+      actions: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          width:
+              isTextFieldVisible ? 0 : MediaQuery.of(context).size.width / 1.5,
+          padding: const EdgeInsets.all(8.0),
+          child: const TextField(
+            maxLines: 1,
+            decoration: InputDecoration(
+              labelText: 'Search',
+              isDense: true,
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            IconButton(
+              onPressed: toggleTextFieldVisibility,
+              icon: const Icon(Icons.search),
+            ),
+          ],
+        ),
+      ],
     );
-  }
-}
-
-class CurveLinePainter extends CustomPainter {
-  final double startY;
-  final double endX;
-
-  CurveLinePainter({required this.startY, required this.endX});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppStyle.titleColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final path = Path();
-
-    // Start point
-    path.moveTo(endX, startY);
-
-    // Control point for the curve (you can adjust this for the desired curve)
-    final controlPoint = Offset(endX + 50.0, startY + 50.0);
-
-    // End point (center of the floating action button)
-    final endPoint = Offset(endX, startY + 250.0);
-
-    // Draw a quadratic Bézier curve
-    path.quadraticBezierTo(
-        controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
-
-    canvas.drawPath(path, paint);
-
-    // Draw an arrowhead at the endpoint
-    final arrowPaint = Paint()
-      ..color = AppStyle.titleColor
-      ..style = PaintingStyle.fill;
-
-    final arrowPath = Path();
-    arrowPath.moveTo(endPoint.dx - 12.0, endPoint.dy);
-    arrowPath.lineTo(endPoint.dx + 12.0, endPoint.dy);
-    arrowPath.lineTo(endPoint.dx, endPoint.dy + 20.0);
-
-    canvas.drawPath(arrowPath, arrowPaint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
   }
 }
