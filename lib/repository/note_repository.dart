@@ -32,4 +32,24 @@ class NoteRepository {
         .where("creator_id", isEqualTo: currentUserUid)
         .snapshots();
   }
+
+  Stream<QuerySnapshot> getNotesColorId() {
+    return notesCollection
+        .where("color_id", isEqualTo: currentUserUid)
+        .snapshots();
+  }
+
+  Future<int> getColorIdCount(int colorId, String currentUserUid) async {
+    try {
+      QuerySnapshot querySnapshot = await notesCollection
+          .where("color_id", isEqualTo: colorId)
+          .where("creator_id", isEqualTo: currentUserUid)
+          .get();
+
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print("Error getting color_id count: $e");
+      return 0; // Return 0 in case of an error.
+    }
+  }
 }

@@ -8,6 +8,7 @@ import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/note/widgets/color_picker.dart';
 import 'package:notes_app/widget_tree.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -21,6 +22,7 @@ class _MyDrawerState extends State<MyDrawer> {
   final FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
   final UserDataRepository userDataRepository = UserDataRepository();
+  int colorId = 0;
 
   String profilePictureURL = ''; // Store profile picture URL
 
@@ -50,6 +52,7 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     final profilePicture = getUserProfilePicture(profilePictureURL);
+    final FirebaseAuth auth = FirebaseAuth.instance;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -84,6 +87,43 @@ class _MyDrawerState extends State<MyDrawer> {
               ),
             ),
             decoration: BoxDecoration(color: AppStyle.noteAppColor),
+          ),
+          Column(
+            children: [
+              ColorPicker(
+                colors: AppStyle.cardsColor,
+                selectedColorIndex: colorId,
+                onColorSelected: (newColorId) {
+                  setState(() {
+                    colorId = newColorId;
+                    print(newColorId);
+                  });
+                },
+              ),
+              FutureBuilder<int>(
+                future: noteRepository.getColorIdCount(
+                    colorId, auth.currentUser!.uid),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Text("Loading...");
+                  }
+                  if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  }
+                  if (snapshot.hasData) {
+                    return Text(
+                      "${snapshot.data} Notes",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    );
+                  }
+                  return const Text("No data");
+                },
+              ),
+            ],
           ),
           getUsersNoteLength(noteRepository),
           ListTile(

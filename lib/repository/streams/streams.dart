@@ -18,7 +18,7 @@ StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
         int numberOfNotes = snapshot.data!.docs.length;
         return ListTile(
           leading: const Icon(Icons.note),
-          title: Text('$numberOfNotes Notes'),
+          title: Text('Total Notes: $numberOfNotes'),
         );
       }
       return const ListTile(
