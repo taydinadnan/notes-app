@@ -1,21 +1,54 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
+import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/widget_tree.dart';
 
-class MyDrawer extends StatelessWidget {
-  const MyDrawer({super.key});
+class MyDrawer extends StatefulWidget {
+  const MyDrawer({Key? key}) : super(key: key);
+
+  @override
+  State createState() => _MyDrawerState();
+}
+
+class _MyDrawerState extends State<MyDrawer> {
+  final FirebaseAuth user = FirebaseAuth.instance;
+  final NoteRepository noteRepository = NoteRepository();
+  final UserDataRepository userDataRepository = UserDataRepository();
+
+  String profilePictureURL = ''; // Store profile picture URL
+
+  @override
+  void initState() {
+    super.initState();
+    // Load the user's profile picture URL in initState
+    loadUserProfileImage();
+  }
+
+  Future<void> loadUserProfileImage() async {
+    final Reference storageRef = FirebaseStorage.instance
+        .ref()
+        .child('user_profile_images/${user.currentUser!.uid}');
+
+    try {
+      final String downloadURL = await storageRef.getDownloadURL();
+      setState(() {
+        profilePictureURL = downloadURL;
+      });
+    } catch (e) {
+      print("Error loading profile picture: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAuth user = FirebaseAuth.instance;
-    final NoteRepository noteRepository = NoteRepository();
-    final UserDataRepository userDataRepository = UserDataRepository();
-    String userEmail = user.currentUser!.email ?? "Invalid";
-    String initialEmailLetter = userEmail[0].toUpperCase();
+    final profilePicture = getUserProfilePicture(profilePictureURL);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -23,11 +56,23 @@ class MyDrawer extends StatelessWidget {
           UserAccountsDrawerHeader(
             accountName: getUserName(userDataRepository, user),
             accountEmail: Text(user.currentUser!.email!),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                initialEmailLetter,
-                style: const TextStyle(fontSize: 40.0),
+            currentAccountPicture: GestureDetector(
+              onTap: () {
+                _pickImage(context);
+              },
+              child: Stack(
+                children: [
+                  profilePicture,
+                  Positioned(
+                    bottom: 1,
+                    right: 1,
+                    child: Icon(
+                      Icons.file_upload,
+                      size: 20,
+                      color: AppStyle.titleColor,
+                    ),
+                  )
+                ],
               ),
             ),
             decoration: BoxDecoration(color: AppStyle.noteAppColor),
@@ -37,10 +82,12 @@ class MyDrawer extends StatelessWidget {
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
             onTap: () async {
-              await UserDataRepository().signOut();
+              await userDataRepository.signOut();
               // ignore: use_build_context_synchronously
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const WidgetTree()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WidgetTree()),
+              );
             },
           ),
         ],
@@ -48,52 +95,45 @@ class MyDrawer extends StatelessWidget {
     );
   }
 
-  StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
-      NoteRepository noteRepository) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: noteRepository.getNotes(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        if (snapshot.hasData) {
-          int numberOfNotes = snapshot.data!.docs.length;
-          return ListTile(
-            leading: const Icon(Icons.note),
-            title: Text('$numberOfNotes Notes'),
-          );
-        }
-        return const ListTile(
-          leading: Icon(Icons.note),
-          title: Text('Number of Notes: 0'),
-        );
-      },
-    );
+  Widget getUserProfilePicture(String profilePictureURL) {
+    if (profilePictureURL.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          profilePictureURL,
+          fit: BoxFit.cover,
+          width: 80,
+          height: 80,
+        ),
+      );
+    } else {
+      return const Center(child: CircularProgressIndicator());
+    }
   }
 
-  StreamBuilder<QuerySnapshot<Object?>> getUserName(
-      UserDataRepository userDataRepository, FirebaseAuth user) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: userDataRepository.getUsers(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
-        if (snapshot.hasData) {
-          final users = snapshot.data!.docs;
-          final currentUserUid = user.currentUser?.uid;
-          if (currentUserUid != null) {
-            final currentUserData = users.firstWhere(
-              (userDoc) => userDoc.id == currentUserUid,
-            );
-            final username = currentUserData['username'];
-            return Text(username);
-          }
-        }
-        return const Text('User Name');
-      },
-    );
+  Future<void> _pickImage(BuildContext context) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+
+      await uploadImageToFirebaseStorage(imageFile);
+
+      loadUserProfileImage();
+    }
+  }
+
+  Future<void> uploadImageToFirebaseStorage(File imageFile) async {
+    try {
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      final Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child('user_profile_images/${auth.currentUser!.uid}');
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      await uploadTask.whenComplete(() {});
+    } catch (e) {
+      print("Error uploading image to Firebase Storage: $e");
+    }
   }
 }

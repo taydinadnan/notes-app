@@ -12,6 +12,7 @@ class UserDataRepository {
         'uid': user.uid,
         'email': email,
         'username': username,
+        'profilePictureURL': 'https://i.imgur.com/lRT3YNb.png'
       };
 
       try {

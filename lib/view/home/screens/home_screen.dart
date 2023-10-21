@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
+import 'package:notes_app/repository/streams/streams.dart';
+import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/drawer.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
 import 'package:notes_app/view/note/screens/note_card.dart';
@@ -156,8 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar buildAppBar() {
     FirebaseAuth user = FirebaseAuth.instance;
-    String userEmail = user.currentUser!.email ?? "Invalid";
-    String initialEmailLetter = userEmail[0].toUpperCase();
+    final UserDataRepository userDataRepository = UserDataRepository();
     return AppBar(
       backgroundColor: AppStyle.bgColor,
       automaticallyImplyLeading: false,
@@ -165,11 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-            onTap: () => _scaffoldKey.currentState!.openDrawer(),
-            child: CircleAvatar(
-              child: Text(initialEmailLetter),
-            ),
-          ),
+              onTap: () => _scaffoldKey.currentState!.openDrawer(),
+              child: getUserProfilePicture(userDataRepository, user)),
         ],
       ),
     );
