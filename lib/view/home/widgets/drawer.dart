@@ -27,7 +27,8 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   void initState() {
     super.initState();
-    // Load the user's profile picture URL in initState
+
+    getUserProfilePicture(profilePictureURL);
     loadUserProfileImage();
   }
 
@@ -66,10 +67,17 @@ class _MyDrawerState extends State<MyDrawer> {
                   Positioned(
                     bottom: 1,
                     right: 1,
-                    child: Icon(
-                      Icons.file_upload,
-                      size: 20,
-                      color: AppStyle.titleColor,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: AppStyle.buttonColor, shape: BoxShape.circle),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Icon(
+                          Icons.file_upload,
+                          size: 15,
+                          color: AppStyle.titleColor,
+                        ),
+                      ),
                     ),
                   )
                 ],
@@ -98,11 +106,13 @@ class _MyDrawerState extends State<MyDrawer> {
   Widget getUserProfilePicture(String profilePictureURL) {
     if (profilePictureURL.isNotEmpty) {
       return ClipOval(
-        child: Image.network(
-          profilePictureURL,
-          fit: BoxFit.cover,
+        child: FadeInImage.assetNetwork(
+          fadeInDuration: const Duration(milliseconds: 10),
+          placeholder: "assets/placeHolder.png",
+          image: profilePictureURL,
           width: 80,
           height: 80,
+          fit: BoxFit.cover,
         ),
       );
     } else {

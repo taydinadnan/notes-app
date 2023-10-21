@@ -53,8 +53,47 @@ StreamBuilder<QuerySnapshot<Object?>> getUserName(
   );
 }
 
-StreamBuilder<QuerySnapshot<Object?>> getUserProfilePicture(
+class UserProfilePictureCache {
+  static final UserProfilePictureCache _instance =
+      UserProfilePictureCache._internal();
+
+  factory UserProfilePictureCache() {
+    return _instance;
+  }
+
+  UserProfilePictureCache._internal();
+
+  Map<String, String> _cache = {};
+
+  void updateCache(String userId, String profilePictureURL) {
+    _cache[userId] = profilePictureURL;
+  }
+
+  String? getFromCache(String userId) {
+    return _cache[userId];
+  }
+}
+
+Widget getUserProfilePicture(
     UserDataRepository userDataRepository, FirebaseAuth user) {
+  final userProfilePictureCache = UserProfilePictureCache();
+
+  String? cachedProfilePicture =
+      userProfilePictureCache.getFromCache(user.currentUser?.uid ?? "");
+
+  if (cachedProfilePicture != null) {
+    return ClipOval(
+      child: FadeInImage.assetNetwork(
+        fadeInDuration: const Duration(milliseconds: 10),
+        placeholder: "assets/placeHolder.png",
+        image: cachedProfilePicture,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
   return StreamBuilder<QuerySnapshot>(
     stream: userDataRepository.getUsers(),
     builder: (context, snapshot) {
@@ -70,12 +109,17 @@ StreamBuilder<QuerySnapshot<Object?>> getUserProfilePicture(
           );
           final profilePicture = currentUserData['profilePictureURL'];
 
+          // Update the cache with the latest profile picture
+          userProfilePictureCache.updateCache(currentUserUid, profilePicture);
+
           return ClipOval(
-            child: Image.network(
-              profilePicture,
-              fit: BoxFit.cover,
+            child: FadeInImage.assetNetwork(
+              fadeInDuration: const Duration(milliseconds: 10),
+              placeholder: "assets/placeHolder.png",
+              image: profilePicture,
               width: 40,
               height: 40,
+              fit: BoxFit.cover,
             ),
           );
         }

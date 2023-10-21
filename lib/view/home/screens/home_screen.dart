@@ -26,13 +26,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   FirebaseAuth user = FirebaseAuth.instance;
+  final UserDataRepository userDataRepository = UserDataRepository();
   final NoteRepository noteRepository = NoteRepository();
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
   bool isTextFieldVisible = false;
   String filterText = "";
-  bool notesFound = true;
 
   TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    getUserProfilePicture(userDataRepository, user);
+    super.initState();
+  }
 
   void toggleTextFieldVisibility() {
     setState(() {
@@ -58,60 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Stack(
                 children: [
-                  StreamBuilder<QuerySnapshot>(
-                    stream: noteRepository.getNotes(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-
-                      final filteredNotes = snapshot.data!.docs.where((note) {
-                        String title = note['note_title'];
-                        String content = note['note_content'];
-                        return title.contains(filterText) ||
-                            content.contains(filterText);
-                      }).toList();
-
-                      notesFound = filteredNotes.isNotEmpty;
-
-                      if (filteredNotes.isEmpty) {
-                        return const Center(
-                          child: EmptyNotesStateScreen(),
-                        );
-                      }
-
-                      return GridView(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                        ),
-                        children: filteredNotes
-                            .map((note) => OpenContainer(
-                                  closedElevation: 0,
-                                  transitionType: ContainerTransitionType.fade,
-                                  tappable: false,
-                                  closedColor: AppStyle.bgColor,
-                                  closedShape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                  closedBuilder: (context, action) {
-                                    return noteCard(() {
-                                      action();
-                                    }, note);
-                                  },
-                                  openBuilder: (
-                                    BuildContext _,
-                                    CloseContainerActionCallback closeContainer,
-                                  ) {
-                                    return EditNoteScreen(note);
-                                  },
-                                ))
-                            .toList(),
-                      );
-                    },
-                  ),
+                  buildNotes(),
                 ],
               ),
             ),
@@ -122,9 +75,72 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  StreamBuilder<QuerySnapshot<Object?>> buildNotes() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: noteRepository.getNotes(),
+      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final filteredNotes = _filterNotes(snapshot.data, filterText);
+
+        if (filteredNotes.isEmpty) {
+          return const Center(
+            child: EmptyNotesStateScreen(),
+          );
+        }
+
+        return _buildNoteGrid(filteredNotes);
+      },
+    );
+  }
+
+  List<QueryDocumentSnapshot> _filterNotes(
+      QuerySnapshot? data, String filterText) {
+    if (data == null) {
+      return [];
+    }
+
+    return data.docs.where((note) {
+      String title = note['note_title'];
+      String content = note['note_content'];
+      return title.contains(filterText) || content.contains(filterText);
+    }).toList();
+  }
+
+  GridView _buildNoteGrid(List<QueryDocumentSnapshot> filteredNotes) {
+    return GridView(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      children: filteredNotes
+          .map((note) => OpenContainer(
+                closedElevation: 0,
+                transitionType: ContainerTransitionType.fade,
+                tappable: false,
+                closedColor: AppStyle.bgColor,
+                closedShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                closedBuilder: (context, action) {
+                  return noteCard(() {
+                    action();
+                  }, note);
+                },
+                openBuilder: (BuildContext _,
+                    CloseContainerActionCallback closeContainer) {
+                  return EditNoteScreen(note);
+                },
+              ))
+          .toList(),
+    );
+  }
+
   AppBar buildAppBar() {
-    FirebaseAuth user = FirebaseAuth.instance;
-    final UserDataRepository userDataRepository = UserDataRepository();
+    final FirebaseAuth user = FirebaseAuth.instance;
     return AppBar(
       backgroundColor: AppStyle.bgColor,
       automaticallyImplyLeading: false,
@@ -138,36 +154,35 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       actions: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          width:
-              isTextFieldVisible ? MediaQuery.of(context).size.width / 1.5 : 0,
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            maxLines: 1,
-            onChanged: (text) {
-              setState(() {
-                filterText = text;
-              });
-            },
-            decoration: const InputDecoration(
-              labelText: 'Search',
-              isDense: true,
-            ),
-          ),
-        ),
-        Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                toggleTextFieldVisibility();
-                filterText = '';
-              },
-              icon: const Icon(Icons.search),
-            ),
-          ],
+        buildSearchField(),
+        IconButton(
+          onPressed: () {
+            toggleTextFieldVisibility();
+            filterText = '';
+          },
+          icon: const Icon(Icons.search),
         ),
       ],
+    );
+  }
+
+  Widget buildSearchField() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      width: isTextFieldVisible ? MediaQuery.of(context).size.width / 1.5 : 0,
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        maxLines: 1,
+        onChanged: (text) {
+          setState(() {
+            filterText = text;
+          });
+        },
+        decoration: const InputDecoration(
+          labelText: 'Search',
+          isDense: true,
+        ),
+      ),
     );
   }
 }
