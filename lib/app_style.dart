@@ -6,6 +6,8 @@ class AppStyle {
   static Color mainColor = const Color(0xFFf5f5f5);
   static Color accentColor = const Color(0xFFf5f5f5);
   static Color white = const Color(0xFFFFFFFF);
+  static Color grey = const Color(0xFF9E9E9E);
+  static Color black = const Color(0xFF000000);
 
   static Color titleColor = const Color(0xFF192a33);
   static Color textColor = const Color(0xFF4a6078);

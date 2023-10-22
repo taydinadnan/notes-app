@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 
@@ -55,7 +56,7 @@ class NoteCard extends StatelessWidget {
                 bottom: 1,
                 right: 1,
                 child: Text(
-                  doc["creation_date"],
+                  formatFirestoreDate(doc["creation_date"]),
                   overflow: TextOverflow.ellipsis,
                   style: AppStyle.dateTitle
                       .copyWith(color: AppStyle.titleColor.withOpacity(0.5)),
@@ -66,5 +67,18 @@ class NoteCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String formatFirestoreDate(String firestoreDate) {
+    final firestoreDateFormat = DateFormat("dd/MMM/yyyy - HH:mm");
+    final desiredFormat = DateFormat("dd MMM");
+
+    try {
+      final date = firestoreDateFormat.parse(firestoreDate);
+      return desiredFormat.format(date);
+    } catch (e) {
+      // Handle any potential errors when parsing the date
+      return "Invalid Date";
+    }
   }
 }

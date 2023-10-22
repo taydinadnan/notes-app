@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 class NoteRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
+  String date = DateFormat("dd/MMM/yyyy - HH:mm").format(DateTime.now());
 
   String get currentUserUid => _auth.currentUser?.uid ?? '';
 

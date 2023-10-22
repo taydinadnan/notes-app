@@ -75,16 +75,20 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppStyle.cardsColor[colorId],
+      backgroundColor: isEditing ? AppStyle.cardsColor[colorId] : Colors.black,
       appBar: AppBar(
         title: Text(
           isEditing
               ? titleController.text.toUpperCase()
               : widget.doc["creation_date"],
-          style: AppStyle.dateTitle,
+          style: AppStyle.dateTitle
+              .copyWith(color: isEditing ? AppStyle.titleColor : AppStyle.grey),
         ),
-        backgroundColor: AppStyle.cardsColor[colorId],
+        backgroundColor:
+            isEditing ? AppStyle.cardsColor[colorId] : Colors.black,
         elevation: 0.0,
+        iconTheme: IconThemeData(
+            color: isEditing ? AppStyle.titleColor : AppStyle.grey),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
@@ -102,9 +106,12 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                     style: TextStyle(fontSize: 11, color: AppStyle.titleColor),
                   ),
                   SizedBox(width: isEditing ? 8 : 0),
-                  Icon(isEditing
-                      ? Icons.remove_red_eye_outlined
-                      : Icons.remove_red_eye_rounded),
+                  Icon(
+                    isEditing
+                        ? Icons.remove_red_eye_outlined
+                        : Icons.remove_red_eye_rounded,
+                    color: isEditing ? AppStyle.black : AppStyle.grey,
+                  ),
                 ],
               ),
             ),
@@ -154,7 +161,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                     )
                   : Text(
                       titleController.text,
-                      style: AppStyle.mainTitle,
+                      style: AppStyle.mainTitle.copyWith(color: AppStyle.white),
                     ),
               spacingBig,
               isEditing
@@ -183,13 +190,14 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                     )
                   : Text(
                       contentController.text,
-                      style: AppStyle.mainContent,
+                      style:
+                          AppStyle.mainContent.copyWith(color: AppStyle.white),
                     ),
               spacingNormal,
               if (isEditing)
                 Text(
                   widget.doc["creation_date"],
-                  style: AppStyle.dateTitle,
+                  style: AppStyle.mainTitle.copyWith(color: AppStyle.white),
                 ),
             ],
           ),

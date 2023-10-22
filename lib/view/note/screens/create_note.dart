@@ -17,7 +17,7 @@ class CreateNoteScreen extends StatefulWidget {
 
 class _CreateNoteScreenState extends State<CreateNoteScreen> {
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
-  String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
+  String date = DateFormat("dd/MMM/yyyy - HH:mm").format(DateTime.now());
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;

@@ -232,12 +232,10 @@ class _HomeScreenState extends State<HomeScreen> {
         String dateAString = a['creation_date'];
         String dateBString = b['creation_date'];
 
-        // Parse the date strings into DateTime objects
         DateFormat format = DateFormat('dd/MMM/yy - HH:mm');
         DateTime dateA = format.parse(dateAString);
         DateTime dateB = format.parse(dateBString);
 
-        // Compare the DateTime objects
         return dateB.compareTo(dateA);
       });
     } else {
