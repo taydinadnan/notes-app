@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/app_text.dart';
@@ -31,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
   bool isTextFieldVisible = false;
   String filterText = "";
+  bool sortByDate = true;
 
   TextEditingController searchController = TextEditingController();
 
@@ -43,6 +45,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void toggleTextFieldVisibility() {
     setState(() {
       isTextFieldVisible = !isTextFieldVisible;
+    });
+  }
+
+  void toggleSort() {
+    setState(() {
+      sortByDate = !sortByDate;
     });
   }
 
@@ -59,7 +67,31 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            yourRecentNotes,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                yourRecentNotes,
+                PopupMenuButton<bool>(
+                  onSelected: (bool value) {
+                    setState(() {
+                      sortByDate = value;
+                    });
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      const PopupMenuItem<bool>(
+                        value: true,
+                        child: Text("Sort by Date"),
+                      ),
+                      const PopupMenuItem<bool>(
+                        value: false,
+                        child: Text("A-Z"),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
             spacingBig,
             Expanded(
               child: Stack(
@@ -112,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   GridView _buildNoteGrid(List<QueryDocumentSnapshot> filteredNotes) {
+    filteredNotes = sortNotes(filteredNotes); // Sort the notes
     return GridView(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -184,5 +217,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  List<QueryDocumentSnapshot> sortNotes(List<QueryDocumentSnapshot> notes) {
+    if (sortByDate) {
+      notes.sort((a, b) {
+        DateFormat format = DateFormat('dd/MMM/yy - HH:mm');
+        DateTime dateA = format.parse(a['creation_date']);
+        DateTime dateB = format.parse(b['creation_date']);
+        return dateB.compareTo(dateA);
+      });
+    } else {
+      notes.sort((a, b) {
+        String titleA = a['note_title'];
+        String titleB = b['note_title'];
+        return titleA.compareTo(titleB);
+      });
+    }
+    return notes;
   }
 }
