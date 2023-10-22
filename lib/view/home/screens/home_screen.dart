@@ -152,31 +152,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   GridView _buildNoteGrid(List<QueryDocumentSnapshot> filteredNotes) {
-    filteredNotes = sortNotes(filteredNotes); // Sort the notes
-    return GridView(
+    filteredNotes = sortNotes(filteredNotes);
+    return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-      ),
-      children: filteredNotes
-          .map((note) => OpenContainer(
-                closedElevation: 0,
-                transitionType: ContainerTransitionType.fade,
-                tappable: false,
-                closedColor: AppStyle.bgColor,
-                closedShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                ),
-                closedBuilder: (context, action) {
-                  return noteCard(() {
-                    action();
-                  }, note);
-                },
-                openBuilder: (BuildContext _,
-                    CloseContainerActionCallback closeContainer) {
-                  return EditNoteScreen(note);
-                },
-              ))
-          .toList(),
+          crossAxisCount: 1, childAspectRatio: 2.2),
+      itemCount: filteredNotes.length,
+      itemBuilder: (BuildContext context, int index) {
+        final note = filteredNotes[index];
+        return OpenContainer(
+          closedElevation: 0,
+          transitionType: ContainerTransitionType.fade,
+          tappable: false,
+          closedColor: AppStyle.bgColor,
+          closedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+          closedBuilder: (context, action) {
+            return NoteCard(onTap: action, doc: note);
+          },
+          openBuilder:
+              (BuildContext _, CloseContainerActionCallback closeContainer) {
+            return EditNoteScreen(note);
+          },
+        );
+      },
     );
   }
 
