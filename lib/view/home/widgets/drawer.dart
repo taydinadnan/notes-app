@@ -45,6 +45,7 @@ class _MyDrawerState extends State<MyDrawer> {
         profilePictureURL = downloadURL;
       });
     } catch (e) {
+      // ignore: avoid_print
       print("Error loading profile picture: $e");
     }
   }
@@ -96,7 +97,6 @@ class _MyDrawerState extends State<MyDrawer> {
                 onColorSelected: (newColorId) {
                   setState(() {
                     colorId = newColorId;
-                    print(newColorId);
                   });
                 },
               ),
@@ -183,6 +183,7 @@ class _MyDrawerState extends State<MyDrawer> {
       UploadTask uploadTask = storageRef.putFile(imageFile);
       await uploadTask.whenComplete(() {});
     } catch (e) {
+      // ignore: avoid_print
       print("Error uploading image to Firebase Storage: $e");
     }
   }

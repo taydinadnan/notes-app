@@ -38,7 +38,7 @@ class Auth {
         await user.delete();
       }
     } catch (e) {
-      // Handle errors, e.g., user not found, user deletion failed, etc.
+      // ignore: avoid_print
       print('Error deleting user: $e');
     }
   }

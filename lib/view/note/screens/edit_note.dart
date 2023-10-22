@@ -45,12 +45,14 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     Map<String, dynamic> updatedData = {
       "note_title": titleController.text,
       "note_content": contentController.text,
-      "color_id": colorId, // Update color_id in Firestore
+      "color_id": colorId,
     };
 
     docRef.update(updatedData).then((_) {
+      // ignore: avoid_print
       print("Document updated successfully.");
     }).catchError((error) {
+      // ignore: avoid_print
       print("Failed to update document: $error");
     });
   }
@@ -60,9 +62,11 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         FirebaseFirestore.instance.collection("Notes").doc(widget.doc.id);
 
     docRef.delete().then((_) {
+      // ignore: avoid_print
       print("Document deleted successfully.");
       Navigator.pop(context);
     }).catchError((error) {
+      // ignore: avoid_print
       print("Failed to delete document: $error");
     });
   }
@@ -118,9 +122,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                   selectedColorIndex: colorId,
                   onColorSelected: (int newColorId) {
                     setState(() {
-                      colorId = newColorId; // Update colorId
-                      print('New selected index $newColorId');
-                      print('Current color id $colorId');
+                      colorId = newColorId;
                     });
                   },
                 ),

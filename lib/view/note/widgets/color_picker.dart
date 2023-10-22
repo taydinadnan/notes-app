@@ -34,8 +34,8 @@ class _ColorPickerState extends State<ColorPicker> {
             padding: EdgeInsets.all(isSelected ? 0.0 : 2.0),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 100),
-              width: isSelected ? 30 : 25, // Change width when selected
-              height: isSelected ? 30 : 25, // Change height when selected
+              width: isSelected ? 30 : 25,
+              height: isSelected ? 30 : 25,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: color,

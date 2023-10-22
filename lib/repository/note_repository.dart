@@ -6,10 +6,8 @@ class NoteRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
 
-  // Get the user's UID
   String get currentUserUid => _auth.currentUser?.uid ?? '';
 
-  // Reference to the Firestore collection of notes
   CollectionReference notesCollection =
       FirebaseFirestore.instance.collection("Notes");
 
@@ -23,6 +21,7 @@ class NoteRepository {
         "creator_id": _auth.currentUser!.uid,
       });
     } catch (e) {
+      // ignore: avoid_print
       print("Error adding note: $e");
     }
   }
@@ -48,8 +47,7 @@ class NoteRepository {
 
       return querySnapshot.docs.length;
     } catch (e) {
-      print("Error getting color_id count: $e");
-      return 0; // Return 0 in case of an error.
+      return 0;
     }
   }
 }

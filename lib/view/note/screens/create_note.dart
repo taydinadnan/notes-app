@@ -21,7 +21,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   final TextEditingController _mainController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
-  // final int newColorId = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,13 +51,10 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
             Center(
               child: ColorPicker(
                 colors: AppStyle.cardsColor,
-                selectedColorIndex:
-                    colorId, // Pass the current colorId as the selectedColorIndex
+                selectedColorIndex: colorId,
                 onColorSelected: (int newColorId) {
                   setState(() {
-                    colorId =
-                        newColorId; // Update the colorId when a new color is selected
-                    print(newColorId);
+                    colorId = newColorId;
                   });
                 },
               ),

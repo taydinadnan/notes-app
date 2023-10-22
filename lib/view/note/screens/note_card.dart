@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 
 class NoteCard extends StatelessWidget {
@@ -38,9 +39,7 @@ class NoteCard extends StatelessWidget {
                       style: AppStyle.mainTitle,
                     ),
                   ),
-                  const SizedBox(
-                    height: 4.0,
-                  ),
+                  spacingMini,
                   SingleChildScrollView(
                     child: Text(
                       doc["note_content"],

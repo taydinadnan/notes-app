@@ -12,7 +12,6 @@ class AppStyle {
   static Color buttonColor = const Color(0xFFff6e61);
   static Color noteAppColor = const Color(0xFFffad0f);
 
-  ///setting the cards different color
   static List<Color> cardsColor = [
     const Color(0xFFFFB3BA),
     const Color(0xFFFFDEB8),
@@ -23,7 +22,6 @@ class AppStyle {
     const Color(0xFFff9f6b),
   ];
 
-  ///setting the text style
   static TextStyle mainTitle = GoogleFonts.roboto(
       fontSize: 18.0, fontWeight: FontWeight.bold, color: titleColor);
   static TextStyle mainContent = GoogleFonts.nunito(

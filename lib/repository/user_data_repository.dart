@@ -18,6 +18,7 @@ class UserDataRepository {
       try {
         await firestore.collection('users').doc(user.uid).set(userData);
       } catch (e) {
+        // ignore: avoid_print
         print("Error saving user data: $e");
       }
     }

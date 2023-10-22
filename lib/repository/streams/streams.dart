@@ -63,7 +63,7 @@ class UserProfilePictureCache {
 
   UserProfilePictureCache._internal();
 
-  Map<String, String> _cache = {};
+  final Map<String, String> _cache = {};
 
   void updateCache(String userId, String profilePictureURL) {
     _cache[userId] = profilePictureURL;
@@ -109,7 +109,6 @@ Widget getUserProfilePicture(
           );
           final profilePicture = currentUserData['profilePictureURL'];
 
-          // Update the cache with the latest profile picture
           userProfilePictureCache.updateCache(currentUserUid, profilePicture);
 
           return ClipOval(

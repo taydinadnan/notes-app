@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 yourRecentNotes,
                 PopupMenuButton<bool>(
-                  icon: Icon(Icons.sort),
+                  icon: const Icon(Icons.sort),
                   onSelected: (bool value) {
                     setState(() {
                       sortByDate = value;
@@ -90,8 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const PopupMenuItem<bool>(
                         value: false,
                         child: ListTile(
-                          leading:
-                              Icon(Icons.sort_by_alpha), // Change the icon here
+                          leading: Icon(Icons.sort_by_alpha),
                           title: Text("A-Z"),
                         ),
                       ),
