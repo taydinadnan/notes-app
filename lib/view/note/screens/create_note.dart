@@ -33,7 +33,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Add a new Note',
+              'Create Note',
               style: TextStyle(color: Colors.black),
             ),
             Text(
@@ -43,44 +43,72 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ColorPicker(
-                colors: AppStyle.cardsColor,
-                selectedColorIndex: colorId,
-                onColorSelected: (int newColorId) {
-                  setState(() {
-                    colorId = newColorId;
-                  });
-                },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Card(
+                  elevation: 4,
+                  color: AppStyle.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ColorPicker(
+                      colors: AppStyle.cardsColor,
+                      selectedColorIndex: colorId,
+                      onColorSelected: (int newColorId) {
+                        setState(() {
+                          colorId = newColorId;
+                        });
+                      },
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                  border: InputBorder.none,
-                  labelStyle: AppStyle.mainTitle,
-                  label: const Text("Title:")),
-              style: AppStyle.mainTitle,
-            ),
-            const SizedBox(height: 28.0),
-            TextField(
-              controller: _mainController,
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                label: const Text("Note Content:"),
-                labelStyle: AppStyle.mainTitle,
+              const SizedBox(height: 8),
+              Card(
+                elevation: 4,
+                color: AppStyle.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                        border: InputBorder.none,
+                        labelStyle: AppStyle.mainTitle,
+                        label: const Text("Title:")),
+                    style: AppStyle.mainTitle,
+                  ),
+                ),
               ),
-              style: AppStyle.mainContent,
-            ),
-          ],
+              const SizedBox(height: 28.0),
+              Card(
+                elevation: 4,
+                color: AppStyle.white,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: 200,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextField(
+                      controller: _mainController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        label: const Text("Note Content:"),
+                        labelStyle: AppStyle.mainTitle,
+                      ),
+                      style: AppStyle.mainContent,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Column(
