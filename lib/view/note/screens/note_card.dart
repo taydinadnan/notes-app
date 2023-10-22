@@ -39,7 +39,7 @@ class NoteCard extends StatelessWidget {
                       style: AppStyle.mainTitle,
                     ),
                   ),
-                  spacingMini,
+                  spacingWidthMini,
                   SingleChildScrollView(
                     child: Text(
                       doc["note_content"],

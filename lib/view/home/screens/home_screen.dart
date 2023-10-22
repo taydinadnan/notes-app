@@ -125,14 +125,15 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         final filteredNotes = _filterNotes(snapshot.data, filterText);
+        final sortedNotes = sortNotes(filteredNotes);
 
-        if (filteredNotes.isEmpty) {
+        if (sortedNotes.isEmpty) {
           return const Center(
             child: EmptyNotesStateScreen(),
           );
         }
 
-        return _buildNoteGrid(filteredNotes);
+        return _buildNoteGrid(sortedNotes);
       },
     );
   }
@@ -228,9 +229,15 @@ class _HomeScreenState extends State<HomeScreen> {
   List<QueryDocumentSnapshot> sortNotes(List<QueryDocumentSnapshot> notes) {
     if (sortByDate) {
       notes.sort((a, b) {
+        String dateAString = a['creation_date'];
+        String dateBString = b['creation_date'];
+
+        // Parse the date strings into DateTime objects
         DateFormat format = DateFormat('dd/MMM/yy - HH:mm');
-        DateTime dateA = format.parse(a['creation_date']);
-        DateTime dateB = format.parse(b['creation_date']);
+        DateTime dateA = format.parse(dateAString);
+        DateTime dateB = format.parse(dateBString);
+
+        // Compare the DateTime objects
         return dateB.compareTo(dateA);
       });
     } else {

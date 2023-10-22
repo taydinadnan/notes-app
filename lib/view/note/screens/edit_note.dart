@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:notes_app/view/note/widgets/color_picker.dart';
@@ -110,54 +111,88 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isEditing)
-              Center(
-                child: ColorPicker(
-                  colors: AppStyle.cardsColor,
-                  selectedColorIndex: colorId,
-                  onColorSelected: (int newColorId) {
-                    setState(() {
-                      colorId = newColorId;
-                    });
-                  },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isEditing)
+                Center(
+                  child: Card(
+                    elevation: 4,
+                    color: AppStyle.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ColorPicker(
+                        colors: AppStyle.cardsColor,
+                        selectedColorIndex: colorId,
+                        onColorSelected: (int newColorId) {
+                          setState(() {
+                            colorId = newColorId;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            isEditing
-                ? TextFormField(
-                    controller: titleController,
-                    style: AppStyle.mainTitle,
-                  )
-                : Text(
-                    titleController.text,
-                    style: AppStyle.mainTitle,
-                  ),
-            const SizedBox(
-              height: 4.0,
-            ),
-            if (isEditing)
-              Text(
-                widget.doc["creation_date"],
-                style: AppStyle.dateTitle,
-              ),
-            const SizedBox(
-              height: 28.0,
-            ),
-            isEditing
-                ? TextFormField(
-                    controller: contentController,
-                    style: AppStyle.mainContent,
-                    maxLines: null,
-                  )
-                : Text(
-                    contentController.text,
-                    style: AppStyle.mainContent,
-                  ),
-          ],
+              isEditing
+                  ? Card(
+                      elevation: 4,
+                      color: AppStyle.white,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: TextField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelStyle: AppStyle.mainTitle,
+                              label: const Text("Title:")),
+                          style: AppStyle.mainTitle,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      titleController.text,
+                      style: AppStyle.mainTitle,
+                    ),
+              spacingBig,
+              isEditing
+                  ? Card(
+                      elevation: 4,
+                      color: AppStyle.white,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minHeight: 200,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: TextField(
+                            controller: contentController,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              label: const Text("Note Content:"),
+                              labelStyle: AppStyle.mainTitle,
+                            ),
+                            style: AppStyle.mainContent,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Text(
+                      contentController.text,
+                      style: AppStyle.mainContent,
+                    ),
+              spacingNormal,
+              if (isEditing)
+                Text(
+                  widget.doc["creation_date"],
+                  style: AppStyle.dateTitle,
+                ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Column(

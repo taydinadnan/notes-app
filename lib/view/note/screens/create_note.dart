@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/view/note/widgets/color_picker.dart';
@@ -18,7 +19,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
   String date = DateFormat("yy/MMM/dd - HH:mm").format(DateTime.now());
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _mainController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
   FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
   @override
@@ -67,7 +68,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              spacingNormal,
               Card(
                 elevation: 4,
                 color: AppStyle.white,
@@ -94,7 +95,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextField(
-                      controller: _mainController,
+                      controller: _contentController,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       decoration: InputDecoration(
@@ -125,12 +126,12 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
               child: const Icon(Icons.cancel),
             ),
           ),
-          const SizedBox(height: 8),
+          spacingNormal,
           FloatingActionButton(
             backgroundColor: AppStyle.accentColor,
             onPressed: () {
               final title = _titleController.text;
-              final content = _mainController.text;
+              final content = _contentController.text;
 
               if (title.isNotEmpty && content.isNotEmpty) {
                 noteRepository.addNote(title, content, colorId);
