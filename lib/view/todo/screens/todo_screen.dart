@@ -2,7 +2,6 @@ import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/app_text.dart';
 import 'package:notes_app/repository/streams/streams.dart';
@@ -41,16 +40,15 @@ class _TodoScreenState extends State<TodoScreen> {
       drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
       appBar: buildAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            yourRecentTodos,
-            spacingBig,
-            Expanded(child: buildTodosList()),
-          ],
-        ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 24.0, top: 20),
+            child: yourRecentTodos,
+          ),
+          Expanded(child: buildListTodos()), // Change this line
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppStyle.buttonColor,
@@ -104,7 +102,7 @@ class _TodoScreenState extends State<TodoScreen> {
 
   StreamBuilder<QuerySnapshot<Object?>> buildListTodos() {
     return StreamBuilder<QuerySnapshot>(
-      stream: todos.getToDos(),
+      stream: todos.getFilteredToDos(filterText),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

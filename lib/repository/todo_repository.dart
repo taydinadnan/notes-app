@@ -44,4 +44,12 @@ class ToDoRepository {
         .where("creator_id", isEqualTo: currentUserUid)
         .snapshots();
   }
+
+  Stream<QuerySnapshot> getFilteredToDos(String filterText) {
+    return FirebaseFirestore.instance
+        .collection("ToDos")
+        .where("title", isGreaterThanOrEqualTo: filterText)
+        .where("title", isLessThan: filterText + 'z')
+        .snapshots();
+  }
 }
