@@ -3,11 +3,13 @@ import 'package:floating_bottom_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/streams/streams.dart';
+import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/note/screens/create_note.dart';
 import 'package:notes_app/view/note/screens/notes_screen.dart';
 import 'package:notes_app/view/note/widgets/drawer.dart';
 import 'package:notes_app/view/profile/profile_screen.dart';
+import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/todo_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,6 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void triggerAddNoteButton() {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
       return const CreateNoteScreen();
+    }));
+  }
+
+  void triggerAddToDoButton() {
+    ToDoRepository todo = ToDoRepository();
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+      return CreateToDoPage(
+        todoRepository: todo,
+      );
     }));
   }
 
@@ -111,13 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             FloatingCenterButtonChild(
+              onTap: triggerAddToDoButton,
               child: const Icon(
                 Icons.access_alarm,
                 color: AppColors.white,
               ),
-              onTap: () {
-                print('ADD TODO Screen');
-              },
             ),
           ],
         ),
