@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:notes_app/app_spacing.dart';
+import 'package:notes_app/app_style.dart';
 import 'package:notes_app/repository/todo_repository.dart';
+import 'package:notes_app/view/todo/widgets/todo_title_desc_card.dart';
 
 class CreateToDoPage extends StatefulWidget {
   final ToDoRepository todoRepository;
 
-  const CreateToDoPage({super.key, required this.todoRepository});
+  const CreateToDoPage({
+    super.key,
+    required this.todoRepository,
+  });
 
   @override
   State createState() => _CreateToDoPageState();
@@ -15,6 +22,7 @@ class _CreateToDoPageState extends State<CreateToDoPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _todoItemController = TextEditingController();
+  String date = DateFormat("dd/MMM/yyyy - HH:mm").format(DateTime.now());
   List<String> todoList = [];
 
   @override
@@ -46,80 +54,134 @@ class _CreateToDoPageState extends State<CreateToDoPage> {
       final String title = _titleController.text;
       final String description = _descriptionController.text;
 
-      // Use your repository to add the to-do
-      await widget.todoRepository.addToDo(title, description, todoList);
-
-      // Navigate back to the previous screen or perform other actions as needed
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
+      if (todoList.isEmpty) {
+        // Show an error message if there are no to-do items.
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please add at least one to-do item.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        await widget.todoRepository.addToDo(title, description, todoList);
+        Navigator.of(context).pop();
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create To-Do'),
+      backgroundColor: const Color(0xFFbfe7f6),
+      appBar: buildAppBar(),
+      body: buildBody(),
+    );
+  }
+
+  AppBar buildAppBar() {
+    return AppBar(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Create To-Do',
+            style: AppStyle.mainTitle,
+          ),
+          Text(date, style: AppStyle.dateTitle),
+        ],
       ),
-      body: Padding(
+      backgroundColor: const Color(0xFFbfe7f6),
+    );
+  }
+
+  Widget buildBody() {
+    return SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter a title.';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-              const SizedBox(height: 16),
-              const Text('To-Do Items:'),
-              Column(
-                children: todoList.asMap().entries.map((entry) {
-                  final int index = entry.key;
-                  final String todoItem = entry.value;
-                  return ListTile(
-                    title: Text(todoItem),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => _removeTodoItem(index),
-                    ),
-                  );
-                }).toList(),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _todoItemController,
-                      decoration:
-                          const InputDecoration(labelText: 'Add To-Do Item'),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: _addTodoItem,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _submitToDo,
-                child: const Text('Create To-Do'),
-              ),
+              buildTitleAndDescription(),
+              spacingMedium,
+              Text('To-Do Items:', style: AppStyle.mainTitle),
+              buildTodoList(),
+              buildAddTodoItemInput(),
+              spacingMedium,
+              buildCreateToDoButton(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Column buildTitleAndDescription() {
+    return Column(
+      children: [
+        TodoTitleDescriptionCard(
+          titleController: _titleController,
+        ),
+      ],
+    );
+  }
+
+  Column buildTodoList() {
+    return Column(
+      children: todoList.asMap().entries.map((entry) {
+        final int index = entry.key;
+        final String todoItem = entry.value;
+        return Card(
+          elevation: 4,
+          color: AppStyle.white,
+          child: ListTile(
+            title: Text(todoItem),
+            titleTextStyle: AppStyle.mainContent,
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () => _removeTodoItem(index),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Card buildAddTodoItemInput() {
+    return Card(
+      elevation: 4,
+      color: AppStyle.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  labelStyle: AppStyle.mainContent,
+                  label: const Text("Add To-Do Item"),
+                ),
+                textInputAction: TextInputAction.go,
+                onEditingComplete: _addTodoItem,
+                style: AppStyle.mainContent,
+                controller: _todoItemController,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _addTodoItem,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  ElevatedButton buildCreateToDoButton() {
+    return ElevatedButton(
+      onPressed: _submitToDo,
+      child: const Text('Create To-Do'),
     );
   }
 }

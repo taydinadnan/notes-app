@@ -15,3 +15,7 @@ const spacingWidthMini = SizedBox(
 const spacingMini = SizedBox(
   height: 4.0,
 );
+
+const spacingMedium = SizedBox(
+  height: 16.0,
+);
