@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/note/widgets/drawer.dart';
 import 'package:notes_app/view/todo/screens/create_todo.dart';
+import 'package:notes_app/view/todo/screens/edit_todo.dart';
 import 'package:notes_app/view/todo/screens/todo_card.dart';
 
 class TodoScreen extends StatefulWidget {
@@ -49,7 +51,22 @@ class _TodoScreenState extends State<TodoScreen> {
           } else {
             return ListView(
               children: snapshot.data!.docs.map((doc) {
-                return ToDoCard(onTap: () {}, doc: doc);
+                return OpenContainer(
+                  closedElevation: 0,
+                  transitionType: ContainerTransitionType.fade,
+                  tappable: false,
+                  closedColor: AppStyle.bgColor,
+                  closedShape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  closedBuilder: (context, action) {
+                    return ToDoCard(onTap: action, doc: doc);
+                  },
+                  openBuilder: (BuildContext _,
+                      CloseContainerActionCallback closeContainer) {
+                    return EditToDoScreen(doc);
+                  },
+                );
               }).toList(),
             );
           }
