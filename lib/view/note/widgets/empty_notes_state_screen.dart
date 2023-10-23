@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/view/home/widgets/curve_line_painter.dart';
+import 'package:notes_app/view/note/widgets/curve_line_painter.dart';
 
 class EmptyNotesStateScreen extends StatelessWidget {
   const EmptyNotesStateScreen({

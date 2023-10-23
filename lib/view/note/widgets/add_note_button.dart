@@ -1,13 +1,14 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/view/note/screens/create_note.dart';
 
 class AddNoteButton extends StatelessWidget {
   const AddNoteButton({
-    super.key,
+    Key? key,
     required this.colorId,
-  });
+  }) : super(key: key);
 
   final int colorId;
 
