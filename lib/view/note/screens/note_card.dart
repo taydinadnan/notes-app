@@ -9,10 +9,10 @@ class NoteCard extends StatelessWidget {
   final QueryDocumentSnapshot doc;
 
   const NoteCard({
-    super.key,
+    Key? key,
     required this.onTap,
     required this.doc,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,42 +29,58 @@ class NoteCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Stack(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Flexible(
-                    child: Text(
-                      doc["note_title"],
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: AppStyle.mainTitle,
-                    ),
-                  ),
-                  spacingWidthMini,
-                  SingleChildScrollView(
-                    child: Text(
-                      doc["note_content"],
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppStyle.mainContent
-                          .copyWith(color: AppStyle.titleColor.withOpacity(1)),
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                bottom: 1,
-                right: 1,
-                child: Text(
-                  formatFirestoreDate(doc["creation_date"]),
-                  overflow: TextOverflow.ellipsis,
-                  style: AppStyle.dateTitle
-                      .copyWith(color: AppStyle.titleColor.withOpacity(0.5)),
-                ),
-              ),
+              buildNoteInfo(),
+              buildCreationDate(),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Column buildNoteInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildNoteTitle(),
+        spacingWidthMini,
+        buildNoteContent(),
+      ],
+    );
+  }
+
+  Flexible buildNoteTitle() {
+    return Flexible(
+      child: Text(
+        doc["note_title"],
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+        style: AppStyle.mainTitle,
+      ),
+    );
+  }
+
+  SingleChildScrollView buildNoteContent() {
+    return SingleChildScrollView(
+      child: Text(
+        doc["note_content"],
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: AppStyle.mainContent
+            .copyWith(color: AppStyle.titleColor.withOpacity(1)),
+      ),
+    );
+  }
+
+  Positioned buildCreationDate() {
+    return Positioned(
+      bottom: 1,
+      right: 1,
+      child: Text(
+        formatFirestoreDate(doc["creation_date"]),
+        overflow: TextOverflow.ellipsis,
+        style: AppStyle.dateTitle
+            .copyWith(color: AppStyle.titleColor.withOpacity(0.5)),
       ),
     );
   }
@@ -77,7 +93,6 @@ class NoteCard extends StatelessWidget {
       final date = firestoreDateFormat.parse(firestoreDate);
       return desiredFormat.format(date);
     } catch (e) {
-      // Handle any potential errors when parsing the date
       return "Invalid Date";
     }
   }

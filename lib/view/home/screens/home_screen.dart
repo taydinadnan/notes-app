@@ -26,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  FirebaseAuth user = FirebaseAuth.instance;
+  final FirebaseAuth user = FirebaseAuth.instance;
   final UserDataRepository userDataRepository = UserDataRepository();
   final NoteRepository noteRepository = NoteRepository();
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
@@ -61,55 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
       appBar: buildAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                yourRecentNotes,
-                PopupMenuButton<bool>(
-                  icon: const Icon(Icons.sort),
-                  onSelected: (bool value) {
-                    setState(() {
-                      sortByDate = value;
-                    });
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      const PopupMenuItem<bool>(
-                        value: true,
-                        child: ListTile(
-                          title: Text("Date"),
-                          leading: Icon(Icons.date_range),
-                        ),
-                      ),
-                      const PopupMenuItem<bool>(
-                        value: false,
-                        child: ListTile(
-                          leading: Icon(Icons.sort_by_alpha),
-                          title: Text("A-Z"),
-                        ),
-                      ),
-                    ];
-                  },
-                ),
-              ],
-            ),
-            spacingBig,
-            Expanded(
-              child: Stack(
-                children: [
-                  buildNotes(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: buildBody(),
       floatingActionButton: AddNoteButton(colorId: colorId),
     );
   }
@@ -155,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
     filteredNotes = sortNotes(filteredNotes);
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1, childAspectRatio: 2.2),
+        crossAxisCount: 1,
+        childAspectRatio: 2.2,
+      ),
       itemCount: filteredNotes.length,
       itemBuilder: (BuildContext context, int index) {
         final note = filteredNotes[index];
@@ -180,7 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   AppBar buildAppBar() {
-    final FirebaseAuth user = FirebaseAuth.instance;
     return AppBar(
       backgroundColor: AppStyle.bgColor,
       automaticallyImplyLeading: false,
@@ -196,10 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
       actions: [
         buildSearchField(),
         IconButton(
-          onPressed: () {
-            toggleTextFieldVisibility();
-            filterText = '';
-          },
+          onPressed: toggleTextFieldVisibility,
           icon: const Icon(Icons.search),
         ),
       ],
@@ -246,5 +196,55 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
     return notes;
+  }
+
+  Widget buildBody() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              yourRecentNotes,
+              PopupMenuButton<bool>(
+                icon: const Icon(Icons.sort),
+                onSelected: (bool value) {
+                  toggleSort();
+                },
+                itemBuilder: (BuildContext context) {
+                  return [
+                    const PopupMenuItem<bool>(
+                      value: true,
+                      child: ListTile(
+                        title: Text("Date"),
+                        leading: Icon(Icons.date_range),
+                      ),
+                    ),
+                    const PopupMenuItem<bool>(
+                      value: false,
+                      child: ListTile(
+                        leading: Icon(Icons.sort_by_alpha),
+                        title: Text("A-Z"),
+                      ),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+          spacingBig,
+          Expanded(
+            child: Stack(
+              children: [
+                buildNotes(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
