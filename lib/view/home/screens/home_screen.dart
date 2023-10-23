@@ -117,14 +117,14 @@ class _HomeScreenState extends State<HomeScreen> {
             FloatingCenterButtonChild(
               onTap: triggerAddNoteButton,
               child: const Icon(
-                Icons.plus_one,
+                Icons.notes,
                 color: AppColors.white,
               ),
             ),
             FloatingCenterButtonChild(
               onTap: triggerAddToDoButton,
               child: const Icon(
-                Icons.access_alarm,
+                Icons.check,
                 color: AppColors.white,
               ),
             ),
