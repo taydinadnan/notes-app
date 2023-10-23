@@ -2,7 +2,9 @@ import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/app_text.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
@@ -39,17 +41,81 @@ class _TodoScreenState extends State<TodoScreen> {
       drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
       appBar: buildAppBar(),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: todos.getToDos(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No to-do items found.'));
-          } else {
-            return ListView(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            yourRecentTodos,
+            spacingBig,
+            Expanded(child: buildTodosList()),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppStyle.buttonColor,
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CreateToDoPage(todoRepository: todos)));
+          CreateToDoPage(todoRepository: todos);
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  StreamBuilder<QuerySnapshot<Object?>> buildTodosList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: todos.getToDos(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No to-do items found.'));
+        } else {
+          return ListView(
+            children: snapshot.data!.docs.map((doc) {
+              return OpenContainer(
+                closedElevation: 0,
+                transitionType: ContainerTransitionType.fade,
+                tappable: false,
+                closedColor: AppStyle.bgColor,
+                closedShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                closedBuilder: (context, action) {
+                  return ToDoCard(onTap: action, doc: doc);
+                },
+                openBuilder: (BuildContext _,
+                    CloseContainerActionCallback closeContainer) {
+                  return EditToDoScreen(doc);
+                },
+              );
+            }).toList(),
+          );
+        }
+      },
+    );
+  }
+
+  StreamBuilder<QuerySnapshot<Object?>> buildListTodos() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: todos.getToDos(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No to-do items found.'));
+        } else {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
               children: snapshot.data!.docs.map((doc) {
                 return OpenContainer(
                   closedElevation: 0,
@@ -68,17 +134,10 @@ class _TodoScreenState extends State<TodoScreen> {
                   },
                 );
               }).toList(),
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CreateToDoPage(todoRepository: todos)));
-        CreateToDoPage(todoRepository: todos);
-      }),
+            ),
+          );
+        }
+      },
     );
   }
 

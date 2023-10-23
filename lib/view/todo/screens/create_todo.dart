@@ -121,6 +121,7 @@ class _CreateToDoPageState extends State<CreateToDoPage> {
       children: [
         TodoTitleDescriptionCard(
           titleController: _titleController,
+          descriptionController: _descriptionController,
         ),
       ],
     );

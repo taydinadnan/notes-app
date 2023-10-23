@@ -8,3 +8,10 @@ final yourRecentNotes = Text("Your recent Notes",
       fontWeight: FontWeight.bold,
       fontSize: 22,
     ));
+
+final yourRecentTodos = Text("To Do List",
+    style: GoogleFonts.roboto(
+      color: AppStyle.titleColor,
+      fontWeight: FontWeight.bold,
+      fontSize: 22,
+    ));

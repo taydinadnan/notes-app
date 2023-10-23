@@ -14,6 +14,7 @@ class AppStyle {
 
   static Color buttonColor = const Color(0xFFff6e61);
   static Color noteAppColor = const Color(0xFFffad0f);
+  static Color todoAppColor = const Color(0xFFbfe7f6);
 
   static List<Color> cardsColor = [
     const Color(0xFFFFB3BA),

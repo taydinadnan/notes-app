@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/view/todo/widgets/todo_title_desc_card.dart';
 
 class EditToDoScreen extends StatefulWidget {
   final QueryDocumentSnapshot doc;
 
-  const EditToDoScreen(this.doc, {super.key});
+  const EditToDoScreen(this.doc, {Key? key}) : super(key: key);
 
   @override
-  State createState() => _EditToDoScreenState();
+  _EditToDoScreenState createState() => _EditToDoScreenState();
 }
 
 class _EditToDoScreenState extends State<EditToDoScreen> {
@@ -43,10 +45,10 @@ class _EditToDoScreenState extends State<EditToDoScreen> {
   }
 
   void updateToDoInFirestore() {
-    DocumentReference docRef =
+    final docRef =
         FirebaseFirestore.instance.collection("ToDos").doc(widget.doc.id);
 
-    Map<String, dynamic> updatedData = {
+    final updatedData = {
       "title": titleController.text,
       "description": descriptionController.text,
       "done": todoListStatus,
@@ -55,14 +57,14 @@ class _EditToDoScreenState extends State<EditToDoScreen> {
 
     docRef.update(updatedData).then((_) {
       print("To-Do updated successfully.");
-      Navigator.pop(context);
+      toggleEditing();
     }).catchError((error) {
       print("Failed to update to-do: $error");
     });
   }
 
   void deleteToDoFromFirestore() {
-    DocumentReference docRef =
+    final docRef =
         FirebaseFirestore.instance.collection("ToDos").doc(widget.doc.id);
 
     docRef.delete().then((_) {
@@ -78,8 +80,29 @@ class _EditToDoScreenState extends State<EditToDoScreen> {
       todoListStatus[index] = !todoListStatus[index];
     });
 
-    // Update the "done" field in Firestore to reflect the updated todoListStatus.
-    DocumentReference docRef =
+    final newTodoList = <String>[];
+    final newTodoListStatus = <bool>[];
+
+    for (var i = 0; i < todoList.length; i++) {
+      if (!todoListStatus[i]) {
+        newTodoList.add(todoList[i]);
+        newTodoListStatus.add(todoListStatus[i]);
+      }
+    }
+
+    for (var i = 0; i < todoList.length; i++) {
+      if (todoListStatus[i]) {
+        newTodoList.add(todoList[i]);
+        newTodoListStatus.add(todoListStatus[i]);
+      }
+    }
+
+    setState(() {
+      todoList = newTodoList;
+      todoListStatus = newTodoListStatus;
+    });
+
+    final docRef =
         FirebaseFirestore.instance.collection("ToDos").doc(widget.doc.id);
     docRef.update({"done": todoListStatus}).then((_) {
       print("To-Do status updated in Firestore.");
@@ -91,9 +114,13 @@ class _EditToDoScreenState extends State<EditToDoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppStyle.bgColor,
+      backgroundColor: AppStyle.todoAppColor,
       appBar: AppBar(
-        backgroundColor: AppStyle.bgColor,
+        backgroundColor: AppStyle.todoAppColor,
+        title: Text(
+          titleController.text,
+          style: AppStyle.mainTitle,
+        ),
         actions: [
           IconButton(
             icon: Icon(isEditing ? Icons.save : Icons.edit),
@@ -107,81 +134,65 @@ class _EditToDoScreenState extends State<EditToDoScreen> {
           ),
           if (isEditing)
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: const Icon(Icons.delete),
               onPressed: deleteToDoFromFirestore,
             ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 16),
-            isEditing
-                ? Card(
-                    elevation: 4,
-                    color: AppStyle.white,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: titleController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelStyle: AppStyle.mainTitle,
-                          labelText: "Title:",
-                        ),
-                        style: AppStyle.mainTitle,
-                      ),
-                    ),
-                  )
-                : Text(
-                    titleController.text,
-                    style: AppStyle.mainTitle.copyWith(color: AppStyle.white),
-                  ),
-            SizedBox(height: 16),
-            isEditing
-                ? Card(
-                    elevation: 4,
-                    color: AppStyle.white,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: descriptionController,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelStyle: AppStyle.mainTitle,
-                          labelText: "Description:",
-                        ),
-                        style: AppStyle.mainContent,
-                      ),
-                    ),
-                  )
-                : Text(
-                    descriptionController.text,
-                    style: AppStyle.mainContent.copyWith(color: AppStyle.white),
-                  ),
-            SizedBox(height: 16),
+            spacingMedium,
+            if (isEditing)
+              TodoTitleDescriptionCard(
+                titleController: titleController,
+                descriptionController: descriptionController,
+              )
+            else
+              const SizedBox(),
+            spacingMedium,
+            if (!isEditing)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  descriptionController.text,
+                  style: AppStyle.mainContent,
+                ),
+              ),
+            spacingMedium,
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: todoList.asMap().entries.map((entry) {
                 final int index = entry.key;
                 final String task = entry.value;
 
-                return CheckboxListTile(
-                  title: Text(task),
-                  value: todoListStatus[index],
-                  onChanged: (value) {
-                    toggleToDoStatus(index);
-                  },
+                return Card(
+                  elevation: 4,
+                  color: AppStyle.white,
+                  child: CheckboxListTile(
+                    title: Text(
+                      task,
+                      style: TextStyle(
+                        decoration: todoListStatus[index]
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                    value: todoListStatus[index],
+                    onChanged: (value) {
+                      toggleToDoStatus(index);
+                    },
+                  ),
                 );
               }).toList(),
             ),
-            SizedBox(height: 16),
+            spacingMedium,
             if (!isEditing)
               Text(
                 widget.doc["creation_date"],
-                style: AppStyle.mainTitle.copyWith(color: AppStyle.white),
+                style: AppStyle.dateTitle,
               ),
           ],
         ),
