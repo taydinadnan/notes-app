@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:floating_bottom_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
@@ -53,9 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
         barColor: AppStyle.bgColor,
         bottomBar: [
           BottomBarItem(
-              icon: const Icon(Icons.home),
+              icon: const Icon(MyFlutterApp.home),
               iconSelected: Icon(
-                Icons.home,
+                MyFlutterApp.home,
                 color: AppStyle.buttonColor,
               ),
               title: "Home",
@@ -66,9 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               }),
           BottomBarItem(
-              icon: const Icon(Icons.note),
+              icon: const Icon(MyFlutterApp.note),
               iconSelected: Icon(
-                Icons.note,
+                MyFlutterApp.note,
                 color: AppStyle.buttonColor,
               ),
               title: "Notes",
@@ -79,9 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               }),
           BottomBarItem(
-              icon: const Icon(Icons.check),
+              icon: const Icon(MyFlutterApp.checklist),
               iconSelected: Icon(
-                Icons.check,
+                MyFlutterApp.checklist,
                 color: AppStyle.buttonColor,
               ),
               title: "Todo",
@@ -92,9 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               }),
           BottomBarItem(
-              icon: const Icon(Icons.person),
+              icon: const Icon(Icons.person, size: 25),
               iconSelected: Icon(
                 Icons.person,
+                size: 25,
                 color: AppStyle.buttonColor,
               ),
               title: "Profile",
@@ -117,14 +119,14 @@ class _HomeScreenState extends State<HomeScreen> {
             FloatingCenterButtonChild(
               onTap: triggerAddNoteButton,
               child: const Icon(
-                Icons.notes,
+                MyFlutterApp.note,
                 color: AppColors.white,
               ),
             ),
             FloatingCenterButtonChild(
               onTap: triggerAddToDoButton,
               child: const Icon(
-                Icons.check,
+                MyFlutterApp.checklist,
                 color: AppColors.white,
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 
@@ -17,7 +18,7 @@ StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
       if (snapshot.hasData) {
         int numberOfNotes = snapshot.data!.docs.length;
         return ListTile(
-          leading: const Icon(Icons.note),
+          leading: const Icon(MyFlutterApp.note),
           title: Text('Total Notes: $numberOfNotes'),
         );
       }

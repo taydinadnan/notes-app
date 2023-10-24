@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/my_flutter_app_icons.dart';
 
 class ToDoCard extends StatelessWidget {
   const ToDoCard({
@@ -50,7 +51,7 @@ class ToDoCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.check, color: Colors.green),
+                      const Icon(MyFlutterApp.check, color: Colors.green),
                       const SizedBox(width: 8),
                       Text(
                         '$completed Done',
@@ -60,11 +61,7 @@ class ToDoCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        "X",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
+                      const Icon(MyFlutterApp.x, color: Colors.red),
                       const SizedBox(width: 8),
                       Text(
                         '$remaining Left',

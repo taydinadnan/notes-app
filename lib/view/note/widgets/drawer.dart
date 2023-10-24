@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
@@ -127,7 +128,7 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           getUsersNoteLength(noteRepository),
           ListTile(
-            leading: const Icon(Icons.exit_to_app),
+            leading: const Icon(MyFlutterApp.sign_out),
             title: const Text('Logout'),
             onTap: () async {
               await userDataRepository.signOut();

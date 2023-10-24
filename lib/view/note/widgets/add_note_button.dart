@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import 'package:notes_app/app_style.dart';
+import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/view/note/screens/create_note.dart';
 
 class AddNoteButton extends StatelessWidget {
@@ -29,7 +30,7 @@ class AddNoteButton extends StatelessWidget {
         return FloatingActionButton(
           backgroundColor: AppStyle.buttonColor,
           onPressed: action,
-          child: const Icon(Icons.add),
+          child: const Icon(MyFlutterApp.plus),
         );
       },
       openBuilder: (
