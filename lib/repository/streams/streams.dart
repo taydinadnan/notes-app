@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
+import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 
 StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
@@ -25,6 +26,33 @@ StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
       return const ListTile(
         leading: Icon(Icons.note),
         title: Text('Number of Notes: 0'),
+      );
+    },
+  );
+}
+
+StreamBuilder<QuerySnapshot<Object?>> getTodoListLength(
+  ToDoRepository todoRepository,
+) {
+  return StreamBuilder<QuerySnapshot>(
+    stream: todoRepository
+        .getToDos(), // Replace with your method to fetch the to-do list
+    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (snapshot.hasData) {
+        int numberOfItems = snapshot.data!.docs.length;
+        return ListTile(
+          leading: const Icon(Icons.checklist),
+          title: Text('Total To-Do Items: $numberOfItems'),
+        );
+      }
+      return const ListTile(
+        leading: Icon(Icons.checklist),
+        title: Text('Number of To-Do Items: 0'),
       );
     },
   );

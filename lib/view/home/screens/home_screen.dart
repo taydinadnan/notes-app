@@ -1,30 +1,27 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:floating_bottom_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
-import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/todo_repository.dart';
-import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/home/screens/home_screen_widget.dart';
 import 'package:notes_app/view/note/screens/create_note.dart';
 import 'package:notes_app/view/note/screens/notes_screen.dart';
-import 'package:notes_app/view/note/widgets/drawer.dart';
 import 'package:notes_app/view/profile/profile_screen.dart';
 import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/todo_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class CustomNavigationBar extends StatefulWidget {
+  const CustomNavigationBar({super.key});
 
   @override
-  State createState() => _HomeScreenState();
+  State createState() => _CustomNavigationBarState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _CustomNavigationBarState extends State<CustomNavigationBar> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreenWidget(),
+    const HomeScreen(),
     const NotesScreen(),
     const TodoScreen(),
     const ProfileScreen(),
@@ -132,42 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class HomeScreenWidget extends StatefulWidget {
-  const HomeScreenWidget({super.key});
-
-  @override
-  State<HomeScreenWidget> createState() => _HomeScreenWidgetState();
-}
-
-class _HomeScreenWidgetState extends State<HomeScreenWidget> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final FirebaseAuth user = FirebaseAuth.instance;
-  final UserDataRepository userDataRepository = UserDataRepository();
-  @override
-  Widget build(BuildContext context) {
-    // Your Home screen content here
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: AppStyle.bgColor,
-      drawer: const MyDrawer(),
-      appBar: AppBar(
-        backgroundColor: AppStyle.bgColor,
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () => _scaffoldKey.currentState!.openDrawer(),
-              child: getUserProfilePicture(userDataRepository, user),
-            ),
-          ],
-        ),
-        actions: [],
       ),
     );
   }

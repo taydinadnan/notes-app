@@ -17,7 +17,7 @@ class _WidgetTreeState extends State<WidgetTree> {
         stream: Auth().authStateChanges,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return const HomeScreen();
+            return const CustomNavigationBar();
           } else {
             return const LoginScreen();
           }
