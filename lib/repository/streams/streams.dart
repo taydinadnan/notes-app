@@ -5,6 +5,9 @@ import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/home/screens/home_screen_widget.dart';
+import 'package:notes_app/view/note/screens/edit_note.dart';
+import 'package:notes_app/view/todo/screens/edit_todo.dart';
 
 StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
     NoteRepository noteRepository) {
@@ -159,6 +162,110 @@ Widget getUserProfilePicture(
           width: 40,
           height: 40,
         ),
+      );
+    },
+  );
+}
+
+StreamBuilder<QuerySnapshot<Object?>> getNoteNames(
+    NoteRepository noteRepository) {
+  return StreamBuilder<QuerySnapshot>(
+    stream: noteRepository.getNotes(),
+    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (snapshot.hasData) {
+        final notes = snapshot.data!.docs;
+        return ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: notes.length,
+          itemBuilder: (context, index) {
+            final note = notes[index];
+            final noteTitle = note['note_title'];
+            return RecentNoteCard(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return EditNoteScreen(note);
+                    },
+                  ),
+                );
+              },
+              doc: note,
+              title: noteTitle,
+              bgAvailable: true,
+            );
+          },
+        );
+      }
+      return const ListTile(
+        leading: Icon(Icons.note),
+        title: Text('No Notes Available'),
+      );
+    },
+  );
+}
+
+StreamBuilder<QuerySnapshot<Object?>> getTodoNames(
+    ToDoRepository toDoRepository) {
+  return StreamBuilder<QuerySnapshot>(
+    stream: toDoRepository.getToDos(),
+    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (snapshot.hasData) {
+        final todos = snapshot.data!.docs;
+        final filteredTodos = todos.where((todo) {
+          // Check if there is at least one 'false' value in the 'done' list
+          final doneList = (todo['done'] as List).cast<bool>();
+          return doneList.contains(false);
+        }).toList();
+
+        if (filteredTodos.isEmpty) {
+          return const ListTile(
+            leading: Icon(Icons.note),
+            title: Text('No To-Do Items Available'),
+          );
+        }
+
+        return ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: filteredTodos.length,
+          itemBuilder: (context, index) {
+            final todo = filteredTodos[index];
+            final todoTitle = todo['title'];
+            return RecentNoteCard(
+              onTap: () {
+                // Handle the onTap action here
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return EditToDoScreen(
+                        todo,
+                      );
+                    },
+                  ),
+                );
+              },
+              doc: todo,
+              title: todoTitle,
+              bgAvailable: false,
+            );
+          },
+        );
+      }
+      return const ListTile(
+        leading: Icon(MyFlutterApp.checklist),
+        title: Text('No To-Do Items Available'),
       );
     },
   );

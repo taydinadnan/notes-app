@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notes_app/app_style.dart';
 import 'package:notes_app/view/note/widgets/curve_line_painter.dart';
 
 class EmptyNotesStateScreen extends StatelessWidget {
@@ -13,6 +14,7 @@ class EmptyNotesStateScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircleAvatar(
+            backgroundColor: AppStyle.white,
             radius: 112,
             child: ClipOval(
               child: Image.asset(

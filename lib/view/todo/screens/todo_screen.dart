@@ -9,6 +9,7 @@ import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
 import 'package:notes_app/view/note/widgets/drawer.dart';
+import 'package:notes_app/view/note/widgets/empty_notes_state_screen.dart';
 import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/edit_todo.dart';
 import 'package:notes_app/view/todo/screens/todo_card.dart';
@@ -40,7 +41,6 @@ class _TodoScreenState extends State<TodoScreen> {
       key: _scaffoldKey,
       drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
-      // appBar: buildAppBar(),
       body: CustomPaint(
         painter: BackgroundPainter(),
         child: Column(
@@ -67,7 +67,7 @@ class _TodoScreenState extends State<TodoScreen> {
               padding: const EdgeInsets.only(left: 24.0, top: 20),
               child: yourRecentTodos,
             ),
-            Expanded(child: buildListTodos()), // Change this line
+            Expanded(child: buildTodosList()),
           ],
         ),
       ),
@@ -86,15 +86,18 @@ class _TodoScreenState extends State<TodoScreen> {
   }
 
   StreamBuilder<QuerySnapshot<Object?>> buildTodosList() {
+    final user = FirebaseAuth.instance.currentUser;
+    final currentUserId = user!.uid;
+
     return StreamBuilder<QuerySnapshot>(
-      stream: todos.getToDos(),
+      stream: todos.getToDosForUser(currentUserId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No to-do items found.'));
+          return Center(child: const EmptyNotesStateScreen());
         } else {
           return ListView(
             children: snapshot.data!.docs.map((doc) {
@@ -121,44 +124,44 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 
-  StreamBuilder<QuerySnapshot<Object?>> buildListTodos() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: todos.getFilteredToDos(filterText),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text('No to-do items found.'));
-        } else {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: snapshot.data!.docs.map((doc) {
-                return OpenContainer(
-                  closedElevation: 0,
-                  transitionType: ContainerTransitionType.fade,
-                  tappable: false,
-                  closedColor: Colors.transparent,
-                  closedShape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  closedBuilder: (context, action) {
-                    return ToDoCard(onTap: action, doc: doc);
-                  },
-                  openBuilder: (BuildContext _,
-                      CloseContainerActionCallback closeContainer) {
-                    return EditToDoScreen(doc);
-                  },
-                );
-              }).toList(),
-            ),
-          );
-        }
-      },
-    );
-  }
+  // StreamBuilder<QuerySnapshot<Object?>> buildListTodos() {
+  //   return StreamBuilder<QuerySnapshot>(
+  //     stream: todos.getFilteredToDos(filterText),
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return const Center(child: CircularProgressIndicator());
+  //       } else if (snapshot.hasError) {
+  //         return Center(child: Text('Error: ${snapshot.error}'));
+  //       } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+  //         return const Center(child: Text('No to-do items found.'));
+  //       } else {
+  //         return Padding(
+  //           padding: const EdgeInsets.all(16.0),
+  //           child: ListView(
+  //             children: snapshot.data!.docs.map((doc) {
+  //               return OpenContainer(
+  //                 closedElevation: 0,
+  //                 transitionType: ContainerTransitionType.fade,
+  //                 tappable: false,
+  //                 closedColor: Colors.transparent,
+  //                 closedShape: const RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.zero,
+  //                 ),
+  //                 closedBuilder: (context, action) {
+  //                   return ToDoCard(onTap: action, doc: doc);
+  //                 },
+  //                 openBuilder: (BuildContext _,
+  //                     CloseContainerActionCallback closeContainer) {
+  //                   return EditToDoScreen(doc);
+  //                 },
+  //               );
+  //             }).toList(),
+  //           ),
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
 
   AppBar buildAppBar() {
     return AppBar(

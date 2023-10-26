@@ -16,7 +16,21 @@ final yourRecentTodos = Text("To Do List",
       fontSize: 22,
     ));
 
-final homeScreenTitle = Text("Your Notes & Todo List",
+final homeScreenNoteTitle = Text("Your Recent Notes",
+    style: GoogleFonts.roboto(
+      color: AppStyle.titleColor,
+      fontWeight: FontWeight.bold,
+      fontSize: 22,
+    ));
+
+final homeScreenTodoTitle = Text("Your Recent Todos",
+    style: GoogleFonts.roboto(
+      color: AppStyle.titleColor,
+      fontWeight: FontWeight.bold,
+      fontSize: 22,
+    ));
+
+final homeScreenSavedTitle = Text("Your Favorites",
     style: GoogleFonts.roboto(
       color: AppStyle.titleColor,
       fontWeight: FontWeight.bold,

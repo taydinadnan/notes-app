@@ -9,7 +9,7 @@ class CurveLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color.fromARGB(255, 230, 189, 238)
+      ..color = const Color(0xFFff9f6b)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -27,7 +27,7 @@ class CurveLinePainter extends CustomPainter {
     canvas.drawPath(path, paint);
 
     final arrowPaint = Paint()
-      ..color = const Color.fromARGB(255, 230, 189, 238)
+      ..color = const Color(0xFFff9f6b)
       ..style = PaintingStyle.fill;
 
     final arrowPath = Path();
