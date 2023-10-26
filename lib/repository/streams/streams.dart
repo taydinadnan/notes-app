@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:notes_app/app_style.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/screens/home_screen_widget.dart';
+import 'package:notes_app/view/note/screens/create_note.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
+import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/edit_todo.dart';
 
 StreamBuilder<QuerySnapshot<Object?>> getUsersNoteLength(
@@ -179,6 +182,34 @@ StreamBuilder<QuerySnapshot<Object?>> getNoteNames(
       }
       if (snapshot.hasData) {
         final notes = snapshot.data!.docs;
+        if (notes.isEmpty) {
+          return Center(
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CreateNoteScreen()));
+              },
+              child: Card(
+                elevation: 4,
+                color: AppStyle.buttonColor,
+                child: Container(
+                  width: 150,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Add Note", style: AppStyle.mainTitle),
+                      const Icon(MyFlutterApp.plus),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
         return ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: notes.length,
@@ -203,9 +234,9 @@ StreamBuilder<QuerySnapshot<Object?>> getNoteNames(
           },
         );
       }
-      return const ListTile(
-        leading: Icon(Icons.note),
-        title: Text('No Notes Available'),
+      // If there is no data, display a loading indicator
+      return const Center(
+        child: CircularProgressIndicator(),
       );
     },
   );
@@ -230,9 +261,33 @@ StreamBuilder<QuerySnapshot<Object?>> getTodoNames(
         }).toList();
 
         if (filteredTodos.isEmpty) {
-          return const ListTile(
-            leading: Icon(Icons.note),
-            title: Text('No To-Do Items Available'),
+          return Center(
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CreateToDoPage(
+                              todoRepository: toDoRepository,
+                            )));
+              },
+              child: Card(
+                elevation: 4,
+                color: AppStyle.buttonColor,
+                child: Container(
+                  width: 150,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Add Todo", style: AppStyle.mainTitle),
+                      const Icon(MyFlutterApp.plus),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           );
         }
 
