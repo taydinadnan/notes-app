@@ -4,6 +4,10 @@ const spacingBig = SizedBox(
   height: 20.0,
 );
 
+const spacingMega = SizedBox(
+  height: 50.0,
+);
+
 const spacingNormal = SizedBox(
   height: 8.0,
 );

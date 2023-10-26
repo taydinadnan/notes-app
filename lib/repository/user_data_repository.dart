@@ -31,4 +31,18 @@ class UserDataRepository {
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
   }
+
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    try {
+      final userDataDoc = await firestore.collection('users').doc(uid).get();
+      if (userDataDoc.exists) {
+        return userDataDoc.data() as Map<String, dynamic>;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      // Handle errors, e.g., print or throw an exception
+      return null;
+    }
+  }
 }

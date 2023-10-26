@@ -36,3 +36,10 @@ final homeScreenSavedTitle = Text("Your Favorites",
       fontWeight: FontWeight.bold,
       fontSize: 22,
     ));
+
+final profileTitle = Text("Your Profile",
+    style: GoogleFonts.roboto(
+      color: AppStyle.titleColor,
+      fontWeight: FontWeight.bold,
+      fontSize: 22,
+    ));
