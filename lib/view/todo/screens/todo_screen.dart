@@ -7,6 +7,7 @@ import 'package:notes_app/app_text.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/home/widgets/background_painter.dart';
 import 'package:notes_app/view/note/widgets/drawer.dart';
 import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/edit_todo.dart';
@@ -39,16 +40,36 @@ class _TodoScreenState extends State<TodoScreen> {
       key: _scaffoldKey,
       drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
-      appBar: buildAppBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 24.0, top: 20),
-            child: yourRecentTodos,
-          ),
-          Expanded(child: buildListTodos()), // Change this line
-        ],
+      // appBar: buildAppBar(),
+      body: CustomPaint(
+        painter: BackgroundPainter(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => _scaffoldKey.currentState!.openDrawer(),
+                    child: getUserProfilePicture(userDataRepository, user),
+                  ),
+                  buildSearchField(),
+                  IconButton(
+                    onPressed: toggleTextFieldVisibility,
+                    icon: const Icon(Icons.search),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 24.0, top: 20),
+              child: yourRecentTodos,
+            ),
+            Expanded(child: buildListTodos()), // Change this line
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppStyle.buttonColor,
@@ -81,7 +102,7 @@ class _TodoScreenState extends State<TodoScreen> {
                 closedElevation: 0,
                 transitionType: ContainerTransitionType.fade,
                 tappable: false,
-                closedColor: AppStyle.bgColor,
+                closedColor: Colors.transparent,
                 closedShape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.zero,
                 ),
@@ -119,7 +140,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   closedElevation: 0,
                   transitionType: ContainerTransitionType.fade,
                   tappable: false,
-                  closedColor: AppStyle.bgColor,
+                  closedColor: Colors.transparent,
                   closedShape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                   ),
@@ -149,6 +170,11 @@ class _TodoScreenState extends State<TodoScreen> {
           GestureDetector(
             onTap: () => _scaffoldKey.currentState!.openDrawer(),
             child: getUserProfilePicture(userDataRepository, user),
+          ),
+          buildSearchField(),
+          IconButton(
+            onPressed: toggleTextFieldVisibility,
+            icon: const Icon(Icons.search),
           ),
         ],
       ),

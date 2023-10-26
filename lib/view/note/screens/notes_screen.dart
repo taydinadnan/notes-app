@@ -11,6 +11,7 @@ import 'package:notes_app/app_text.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/home/widgets/background_painter.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
 import 'package:notes_app/view/note/screens/note_card.dart';
 import 'package:notes_app/view/note/widgets/add_note_button.dart';
@@ -60,8 +61,34 @@ class _NotesScreenState extends State<NotesScreen> {
       key: _scaffoldKey,
       drawer: const MyDrawer(),
       backgroundColor: AppStyle.bgColor,
-      appBar: buildAppBar(),
-      body: buildBody(),
+      body: CustomPaint(
+          painter: BackgroundPainter(),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 0.0, top: 0),
+            child: Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 16.0, right: 16.0, top: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _scaffoldKey.currentState!.openDrawer(),
+                        child: getUserProfilePicture(userDataRepository, user),
+                      ),
+                      buildSearchField(),
+                      IconButton(
+                        onPressed: toggleTextFieldVisibility,
+                        icon: const Icon(Icons.search),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(child: buildBody()),
+              ],
+            ),
+          )),
       floatingActionButton: AddNoteButton(colorId: colorId),
     );
   }
@@ -117,7 +144,7 @@ class _NotesScreenState extends State<NotesScreen> {
           closedElevation: 0,
           transitionType: ContainerTransitionType.fade,
           tappable: false,
-          closedColor: AppStyle.bgColor,
+          closedColor: Colors.transparent,
           closedShape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -130,29 +157,6 @@ class _NotesScreenState extends State<NotesScreen> {
           },
         );
       },
-    );
-  }
-
-  AppBar buildAppBar() {
-    return AppBar(
-      backgroundColor: AppStyle.bgColor,
-      automaticallyImplyLeading: false,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () => _scaffoldKey.currentState!.openDrawer(),
-            child: getUserProfilePicture(userDataRepository, user),
-          ),
-        ],
-      ),
-      actions: [
-        buildSearchField(),
-        IconButton(
-          onPressed: toggleTextFieldVisibility,
-          icon: const Icon(Icons.search),
-        ),
-      ],
     );
   }
 
