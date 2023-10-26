@@ -55,23 +55,23 @@
       });
     });
     </script>
-    <script type="module">
-    import { initializeApp } from "firebase/app";
-    import { getAnalytics } from "firebase/analytics";
-  
-    const firebaseConfig = {
-      apiKey: "AIzaSyACYISNpCsCVyJhNws9hM7ti4oRy6tHVDQ",
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firebase-analytics.js"></script>
+  <script>
+   
+   var  firebaseConfig = {
+      apiKey: "AIzaSyCy3xNifzBZajlJ6wJaKrXFDFQupxMYu3M",
       authDomain: "notes-40775.firebaseapp.com",
       projectId: "notes-40775",
       storageBucket: "notes-40775.appspot.com",
       messagingSenderId: "511203562858",
-      appId: "1:511203562858:web:d7b81c86a651060a558113",
-      measurementId: "G-HWB3PE51WM"
+      appId: "1:511203562858:web:69584c33b3042fd7558113",
+      measurementId: "G-VVPMDX2LNE"
     };
-    
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-    </script>
+  
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 </body>
 </html>

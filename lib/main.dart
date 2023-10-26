@@ -1,11 +1,27 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_app/widget_tree.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  FirebaseOptions? firebaseOptions;
+
+  // Check if the app is running in a web environment
+  if (kIsWeb) {
+    firebaseOptions = const FirebaseOptions(
+      apiKey: "YourWebApiKey",
+      authDomain: "YourWebAuthDomain",
+      projectId: "YourWebProjectId",
+      storageBucket: "YourWebStorageBucket",
+      messagingSenderId: "YourWebMessagingSenderId",
+      appId: "YourWebAppId",
+      measurementId: "YourWebMeasurementId",
+    );
+  }
+
+  await Firebase.initializeApp(options: firebaseOptions);
   runApp(
     const ProviderScope(
       child: MyApp(),
