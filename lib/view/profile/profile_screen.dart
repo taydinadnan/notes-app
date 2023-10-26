@@ -4,9 +4,7 @@ import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/app_text.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
-import 'package:notes_app/provider/firebase_authentication.dart';
 import 'package:notes_app/repository/note_repository.dart';
-import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
@@ -39,8 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void fetchUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      // Retrieve user data from Firestore
-      final userData = await await userDataRepository.getUserData(user.uid);
+      final userData = await userDataRepository.getUserData(user.uid);
       if (userData != null) {
         setState(() {
           email = userData['email'];

@@ -97,7 +97,7 @@ class _TodoScreenState extends State<TodoScreen> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: const EmptyNotesStateScreen());
+          return const Center(child: EmptyNotesStateScreen());
         } else {
           return ListView(
             children: snapshot.data!.docs.map((doc) {

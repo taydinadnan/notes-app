@@ -10,7 +10,7 @@ class EditToDoScreen extends StatefulWidget {
   const EditToDoScreen(this.doc, {Key? key}) : super(key: key);
 
   @override
-  _EditToDoScreenState createState() => _EditToDoScreenState();
+  State createState() => _EditToDoScreenState();
 }
 
 class _EditToDoScreenState extends State<EditToDoScreen> {
