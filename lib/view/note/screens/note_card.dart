@@ -64,7 +64,7 @@ class NoteCard extends StatelessWidget {
     return SingleChildScrollView(
       child: Text(
         doc["note_content"],
-        maxLines: 2,
+        maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppStyle.mainContent
             .copyWith(color: AppStyle.titleColor.withOpacity(1)),

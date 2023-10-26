@@ -135,7 +135,7 @@ class _NotesScreenState extends State<NotesScreen> {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 1,
-        childAspectRatio: 2.2,
+        childAspectRatio: 2.8,
       ),
       itemCount: filteredNotes.length,
       itemBuilder: (BuildContext context, int index) {

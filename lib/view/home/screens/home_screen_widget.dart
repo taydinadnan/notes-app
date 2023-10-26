@@ -52,56 +52,61 @@ class _HomeScreenState extends State<HomeScreen> {
             bottom: 16.0,
             top: 32,
           ),
+          child: buildHomeCards(),
+        ),
+      ),
+    );
+  }
+
+  Column buildHomeCards() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () => _scaffoldKey.currentState!.openDrawer(),
+              child: getUserProfilePicture(userDataRepository, user),
+            ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                    child: getUserProfilePicture(userDataRepository, user),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    homeScreenTitle,
-                    spacingBig,
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: StreamBuilder<QuerySnapshot>(
-                            stream: getUsersNoteLength(noteRepository),
-                            builder: (context, noteSnapshot) {
-                              if (noteSnapshot.hasData) {}
-                              return buildCard(MyFlutterApp.note, true);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: StreamBuilder<QuerySnapshot>(
-                            stream: getTodoListLength(todoRepository),
-                            builder: (context, todoSnapshot) {
-                              if (todoSnapshot.hasData) {}
-                              return buildCard(MyFlutterApp.checklist, false);
-                            },
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
+              homeScreenTitle,
+              spacingBig,
+              // Row(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   mainAxisAlignment: MainAxisAlignment.start,
+              //   children: [
+              //     Expanded(
+              //       child: StreamBuilder<QuerySnapshot>(
+              //         stream: getUsersNoteLength(noteRepository),
+              //         builder: (context, noteSnapshot) {
+              //           if (noteSnapshot.hasData) {}
+              //           return buildCard(MyFlutterApp.note, true);
+              //         },
+              //       ),
+              //     ),
+              //     const SizedBox(width: 16),
+              //     Expanded(
+              //       child: StreamBuilder<QuerySnapshot>(
+              //         stream: getTodoListLength(todoRepository),
+              //         builder: (context, todoSnapshot) {
+              //           if (todoSnapshot.hasData) {}
+              //           return buildCard(MyFlutterApp.checklist, false);
+              //         },
+              //       ),
+              //     ),
+              //   ],
+              // )
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }
