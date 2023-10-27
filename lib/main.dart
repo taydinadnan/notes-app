@@ -11,20 +11,25 @@ Future<void> main() async {
   // Check if the app is running in a web environment
   if (kIsWeb) {
     firebaseOptions = const FirebaseOptions(
-      apiKey: "YourWebApiKey",
-      authDomain: "YourWebAuthDomain",
-      projectId: "YourWebProjectId",
-      storageBucket: "YourWebStorageBucket",
-      messagingSenderId: "YourWebMessagingSenderId",
-      appId: "YourWebAppId",
-      measurementId: "YourWebMeasurementId",
-    );
+        apiKey: "AIzaSyACYISNpCsCVyJhNws9hM7ti4oRy6tHVDQ",
+        authDomain: "notes-40775.firebaseapp.com",
+        projectId: "notes-40775",
+        storageBucket: "notes-40775.appspot.com",
+        messagingSenderId: "511203562858",
+        appId: "1:511203562858:web:69584c33b3042fd7558113",
+        measurementId: "G-VVPMDX2LNE");
   }
 
-  await Firebase.initializeApp(options: firebaseOptions);
+  try {
+    await Firebase.initializeApp(options: firebaseOptions);
+  } catch (e) {
+    print("Error initializing Firebase: $e");
+    // Handle the error, e.g., show an error dialog or exit gracefully.
+  }
+
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      child: const MyApp(),
     ),
   );
 }
