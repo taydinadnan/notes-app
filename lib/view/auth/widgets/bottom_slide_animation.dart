@@ -16,15 +16,18 @@ class BottomSlideAnimation extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         RotatedBox(
-          quarterTurns: 2,
+          quarterTurns: 0,
           child: Image.asset(
-            "assets/top.png",
+            "assets/torn_paper.png",
             width: MediaQuery.of(context).size.width,
+            height: isAnimatingIn ? MediaQuery.of(context).size.height / 5 : 0,
+            fit: BoxFit.fitWidth,
+            color: const Color(0xFFffad0f),
           ),
         ),
         AnimatedContainer(
           color: const Color(0xFFffad0f),
-          height: isAnimatingIn ? MediaQuery.of(context).size.height / 2.5 : 0,
+          height: isAnimatingIn ? MediaQuery.of(context).size.height / 2 : 0,
           duration: const Duration(milliseconds: 200),
         ),
       ],

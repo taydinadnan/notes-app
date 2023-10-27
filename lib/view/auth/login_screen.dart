@@ -107,6 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       backgroundColor: AppStyle.mainColor,
       body: Stack(
         children: [
+          Image.asset("assets/dnote_logo.png"),
           buildLogin(),
           const AnimatedBackGround(),
           TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
@@ -123,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Login to your account'),
+            Text('Login to your account', style: AppStyle.mainTitle),
             const SizedBox(height: 20),
             buildTextField(_emailController, 'Email', false),
             const SizedBox(height: 10),

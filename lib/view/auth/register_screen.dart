@@ -127,6 +127,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
       backgroundColor: AppStyle.mainColor,
       body: Stack(
         children: [
+          Image.asset("assets/dnote_logo.png"),
           buildSignUp(context),
           const AnimatedBackGround(),
           TopSlideAnimation(isAnimatingIn: isAnimatingIn, context: context),
@@ -149,12 +150,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
             const SizedBox(height: 10),
             buildTextField(_passwordController, 'Password', true),
             const SizedBox(height: 10),
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-              ),
-            ),
+            buildTextField(_usernameController, 'Username', false),
             const SizedBox(height: 20),
             buildErrorMessage(errorMessage),
             _buildRegistrationButton(),
