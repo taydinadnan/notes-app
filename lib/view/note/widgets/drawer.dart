@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
+import 'package:notes_app/view/collections/collection_screen.dart';
 import 'package:notes_app/view/note/widgets/color_picker.dart';
 import 'package:notes_app/widget_tree.dart';
 
@@ -24,6 +26,7 @@ class _MyDrawerState extends State<MyDrawer> {
   final NoteRepository noteRepository = NoteRepository();
   final UserDataRepository userDataRepository = UserDataRepository();
   int colorId = 0;
+  String newCollectionName = '';
 
   String profilePictureURL = ''; // Store profile picture URL
 
@@ -49,6 +52,14 @@ class _MyDrawerState extends State<MyDrawer> {
       // ignore: avoid_print
       print("Error loading profile picture: $e");
     }
+  }
+
+  Future<List<QueryDocumentSnapshot>> getCollections() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Collections')
+        .where("creator_id", isEqualTo: user.currentUser!.uid)
+        .get();
+    return querySnapshot.docs;
   }
 
   @override
@@ -127,6 +138,83 @@ class _MyDrawerState extends State<MyDrawer> {
             ],
           ),
           getUsersNoteLength(noteRepository),
+          FutureBuilder<List<QueryDocumentSnapshot>>(
+            future: getCollections(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text("Loading Collections...");
+              }
+              if (snapshot.hasError) {
+                return Text("Error: ${snapshot.error}");
+              }
+              if (snapshot.hasData) {
+                final collections = snapshot.data;
+                return Column(
+                  children: collections!.asMap().entries.map((entry) {
+                    final collection = entry.value;
+                    final collectionName = collection.get('name') as String;
+                    final collectionId = collection.id; // Get the collection ID
+                    return ListTile(
+                      leading: const Icon(Icons.folder),
+                      title: Text(collectionName),
+                      onTap: () {
+                        // Navigate to NotesListScreen when a collection is selected
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotesListScreen(
+                              collectionId:
+                                  collectionId, // Pass the collection ID
+                              collectionName:
+                                  collectionName, // Pass the collection name
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                );
+              }
+              return const Text("No Collections");
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Create New Collection'),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Enter Collection Name'),
+                    content: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          newCollectionName = value;
+                        });
+                      },
+                    ),
+                    actions: [
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Create'),
+                        onPressed: () {
+                          // Call a function to create the collection with the newCollectionName
+                          noteRepository.createCollection(newCollectionName);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(MyFlutterApp.sign_out),
             title: const Text('Logout'),

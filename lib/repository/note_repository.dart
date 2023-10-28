@@ -11,7 +11,8 @@ class NoteRepository {
   CollectionReference notesCollection =
       FirebaseFirestore.instance.collection("Notes");
 
-  Future<void> addNote(String title, String content, int color) async {
+  Future<void> addNote(
+      String title, String content, int color, String collectionId) async {
     try {
       await notesCollection.add({
         "note_title": title,
@@ -19,9 +20,9 @@ class NoteRepository {
         "note_content": content,
         "color_id": color,
         "creator_id": _auth.currentUser!.uid,
+        "collection_id": collectionId,
       });
     } catch (e) {
-      // ignore: avoid_print
       print("Error adding note: $e");
     }
   }
@@ -49,5 +50,50 @@ class NoteRepository {
     } catch (e) {
       return 0;
     }
+  }
+
+  CollectionReference collectionsCollection =
+      FirebaseFirestore.instance.collection("Collections");
+
+  Future<void> createCollection(String collectionName) async {
+    try {
+      await collectionsCollection.add({
+        "name": collectionName,
+        "creator_id": _auth.currentUser!.uid,
+
+        "created_date": date,
+        "notes": [] // Initialize notes as an empty list
+      });
+    } catch (e) {
+      print("Error creating collection: $e");
+    }
+  }
+
+  Future<void> addNoteToCollection(String collectionId, String noteId) async {
+    try {
+      final collectionRef = collectionsCollection.doc(collectionId);
+      final collectionDoc = await collectionRef.get();
+      final notes = collectionDoc['notes'] as List;
+      notes.add(noteId);
+
+      await collectionRef.update({
+        "notes": notes,
+      });
+    } catch (e) {
+      print("Error adding note to collection: $e");
+    }
+  }
+
+  Stream<QuerySnapshot> getCollections() {
+    return collectionsCollection
+        .where("creator_id", isEqualTo: currentUserUid)
+        .snapshots();
+  }
+
+  Future<QuerySnapshot> getNotesForCollection(String collectionId) {
+    return notesCollection
+        .where("collection_id", isEqualTo: collectionId)
+        .where("creator_id", isEqualTo: currentUserUid)
+        .get();
   }
 }

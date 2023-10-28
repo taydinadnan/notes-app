@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +23,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   final TextEditingController _contentController = TextEditingController();
   final FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
+  String selectedCollectionId =
+      ''; // Variable to store the selected collection ID
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +51,33 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     );
   }
 
+  Future<void> showCollectionPopupMenu(BuildContext context) async {
+    final collections = await fetchCollectionsFromFirestore();
+    final selectedId = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fill,
+      items: collections.map((collection) {
+        return PopupMenuItem<String>(
+          value: collection.id,
+          child: Text(collection.get('name')),
+        );
+      }).toList(),
+    );
+
+    if (selectedId != null) {
+      setState(() {
+        selectedCollectionId = selectedId;
+      });
+    }
+  }
+
+  // Function to fetch collections from Firestore
+  Future<List<QueryDocumentSnapshot>> fetchCollectionsFromFirestore() async {
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('Collections').get();
+    return querySnapshot.docs;
+  }
+
   Widget buildBody() {
     return SingleChildScrollView(
       child: Padding(
@@ -56,6 +86,12 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             buildColorPickerCard(),
+            ElevatedButton(
+              onPressed: () async {
+                await showCollectionPopupMenu(context);
+              },
+              child: const Text('Select Collection'),
+            ),
             spacingNormal,
             buildTitleCard(),
             const SizedBox(height: 28.0),
@@ -135,20 +171,39 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           final title = _titleController.text;
           final content = _contentController.text;
 
-          if (title.isNotEmpty && content.isNotEmpty) {
-            noteRepository.addNote(title, content, colorId);
+          if (title.isNotEmpty &&
+              content.isNotEmpty &&
+              selectedCollectionId.isNotEmpty) {
+            noteRepository.addNote(
+              title,
+              content,
+              colorId,
+              selectedCollectionId,
+            );
+
+            // Now, add the note to the selected collection
+            addNoteToCollection(selectedCollectionId);
+
             Navigator.pop(context);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content:
-                    Text('Please fill in both the title and note content.'),
+                content: Text(
+                    'Please fill in both the title and note content and select a collection.'),
               ),
             );
           }
         }),
       ],
     );
+  }
+
+  void addNoteToCollection(String collectionId) {
+    // Generate a unique note_id
+    String noteId = FirebaseFirestore.instance.collection('Notes').doc().id;
+
+    // Create the note and add it to the collection
+    noteRepository.addNoteToCollection(collectionId, noteId);
   }
 
   Widget buildFloatingActionButtonIcon(IconData icon, Function() onPressed) {

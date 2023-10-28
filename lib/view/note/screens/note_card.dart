@@ -29,58 +29,42 @@ class NoteCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Stack(
             children: [
-              buildNoteInfo(),
-              buildCreationDate(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      doc["note_title"],
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: AppStyle.mainTitle,
+                    ),
+                  ),
+                  spacingWidthMini,
+                  SingleChildScrollView(
+                    child: Text(
+                      doc["note_content"],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppStyle.mainContent
+                          .copyWith(color: AppStyle.titleColor.withOpacity(1)),
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                bottom: 1,
+                right: 1,
+                child: Text(
+                  formatFirestoreDate(doc["creation_date"]),
+                  overflow: TextOverflow.ellipsis,
+                  style: AppStyle.dateTitle
+                      .copyWith(color: AppStyle.titleColor.withOpacity(0.5)),
+                ),
+              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Column buildNoteInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildNoteTitle(),
-        spacingWidthMini,
-        buildNoteContent(),
-      ],
-    );
-  }
-
-  Flexible buildNoteTitle() {
-    return Flexible(
-      child: Text(
-        doc["note_title"],
-        overflow: TextOverflow.ellipsis,
-        maxLines: 2,
-        style: AppStyle.mainTitle,
-      ),
-    );
-  }
-
-  SingleChildScrollView buildNoteContent() {
-    return SingleChildScrollView(
-      child: Text(
-        doc["note_content"],
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppStyle.mainContent
-            .copyWith(color: AppStyle.titleColor.withOpacity(1)),
-      ),
-    );
-  }
-
-  Positioned buildCreationDate() {
-    return Positioned(
-      bottom: 1,
-      right: 1,
-      child: Text(
-        formatFirestoreDate(doc["creation_date"]),
-        overflow: TextOverflow.ellipsis,
-        style: AppStyle.dateTitle
-            .copyWith(color: AppStyle.titleColor.withOpacity(0.5)),
       ),
     );
   }
