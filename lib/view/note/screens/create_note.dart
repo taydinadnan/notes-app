@@ -23,8 +23,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   final TextEditingController _contentController = TextEditingController();
   final FirebaseAuth user = FirebaseAuth.instance;
   final NoteRepository noteRepository = NoteRepository();
-  String selectedCollectionId =
-      ''; // Variable to store the selected collection ID
+  List<String> selectedCollectionIds = [];
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +33,18 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
       body: buildBody(),
       floatingActionButton: buildFloatingActionButton(),
     );
+  }
+
+  Future<List<QueryDocumentSnapshot>> fetchCollectionsForCurrentUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Collections')
+          .where('creator_id', isEqualTo: currentUser.uid)
+          .get();
+      return querySnapshot.docs;
+    }
+    return [];
   }
 
   AppBar buildAppBar() {
@@ -51,27 +62,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     );
   }
 
-  Future<void> showCollectionPopupMenu(BuildContext context) async {
-    final collections = await fetchCollectionsFromFirestore();
-    final selectedId = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fill,
-      items: collections.map((collection) {
-        return PopupMenuItem<String>(
-          value: collection.id,
-          child: Text(collection.get('name')),
-        );
-      }).toList(),
-    );
-
-    if (selectedId != null) {
-      setState(() {
-        selectedCollectionId = selectedId;
-      });
-    }
-  }
-
-  // Function to fetch collections from Firestore
   Future<List<QueryDocumentSnapshot>> fetchCollectionsFromFirestore() async {
     final querySnapshot =
         await FirebaseFirestore.instance.collection('Collections').get();
@@ -86,12 +76,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             buildColorPickerCard(),
-            ElevatedButton(
-              onPressed: () async {
-                await showCollectionPopupMenu(context);
-              },
-              child: const Text('Select Collection'),
-            ),
+            spacingMedium,
+            buildCollectionChips(),
             spacingNormal,
             buildTitleCard(),
             const SizedBox(height: 28.0),
@@ -100,6 +86,207 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
         ),
       ),
     );
+  }
+
+  Widget buildCollectionChips() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Collections')
+          .where('creator_id',
+              isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+        if (snapshot.hasData) {
+          final collections = snapshot.data!.docs;
+          List<Widget> chips = [];
+          String newCollectionName = '';
+
+          Widget newCollectionFilterChip =
+              createNewCollectionChip(context, newCollectionName, collections);
+
+          chips.addAll(
+            collections.map((collection) {
+              final collectionId = collection.id;
+              final isSelected = selectedCollectionIds.contains(collectionId);
+
+              return collectionNameChips(
+                  context, collectionId, collection, isSelected);
+            }).toList(),
+          );
+          chips.add(newCollectionFilterChip);
+          return Wrap(
+            spacing: 8.0,
+            runSpacing: 8,
+            children: chips,
+          );
+        } else {
+          return const Text('No collections found.');
+        }
+      },
+    );
+  }
+
+  FilterChip createNewCollectionChip(
+      BuildContext context,
+      String newCollectionName,
+      List<QueryDocumentSnapshot<Object?>> collections) {
+    return FilterChip(
+      visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
+      elevation: 4,
+      backgroundColor: AppStyle.buttonColor.withOpacity(0.5),
+      shape: const StadiumBorder(side: BorderSide()),
+      label: Text(
+        "Create new Collection",
+        style: AppStyle.mainTitle.copyWith(fontSize: 15),
+      ),
+      onSelected: (selected) {
+        showCreateNewCollectionDialog(context, newCollectionName, collections);
+      },
+    );
+  }
+
+  Wrap collectionNameChips(BuildContext context, String collectionId,
+      QueryDocumentSnapshot<Object?> collection, bool isSelected) {
+    return Wrap(
+      children: [
+        InkWell(
+          onLongPress: () {
+            _showDeleteConfirmationDialog(context, collectionId);
+          },
+          child: FilterChip(
+            deleteIcon: const Icon(Icons.remove),
+            visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
+            elevation: 4,
+            backgroundColor: Colors.transparent,
+            shape: const StadiumBorder(side: BorderSide()),
+            label: Text(
+              collection['name'],
+              style: AppStyle.mainTitle.copyWith(fontSize: 15),
+            ),
+            selected: isSelected,
+            onSelected: (selected) {
+              setState(() {
+                selectedCollectionIds.clear();
+                if (selected) {
+                  selectedCollectionIds.add(collectionId);
+                }
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<dynamic> showCreateNewCollectionDialog(
+      BuildContext context,
+      String newCollectionName,
+      List<QueryDocumentSnapshot<Object?>> collections) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Enter Collection Name'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        newCollectionName = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      errorText: newCollectionName.isEmpty
+                          ? 'Collection name cannot be empty'
+                          : null,
+                    ),
+                  ),
+                  if (isDuplicateCollectionName(collections, newCollectionName))
+                    const Text(
+                      'Collection name already exists',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Create'),
+                  onPressed: () {
+                    if (newCollectionName.isNotEmpty &&
+                        !isDuplicateCollectionName(
+                            collections, newCollectionName)) {
+                      noteRepository.createCollection(newCollectionName);
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Press and hold the tag to delete it"),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDeleteConfirmationDialog(
+      BuildContext context, String collectionId) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Collection'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete this collection?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                noteRepository.removeCollection(collectionId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool isDuplicateCollectionName(
+    List<QueryDocumentSnapshot> collections,
+    String newCollectionName,
+  ) {
+    return collections.any((collection) =>
+        collection['name'].toString().toLowerCase() ==
+        newCollectionName.trim().toLowerCase());
   }
 
   ColorPickerCard buildColorPickerCard() {
@@ -173,23 +360,22 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
 
           if (title.isNotEmpty &&
               content.isNotEmpty &&
-              selectedCollectionId.isNotEmpty) {
-            noteRepository.addNote(
-              title,
-              content,
-              colorId,
-              selectedCollectionId,
-            );
-
-            // Now, add the note to the selected collection
-            addNoteToCollection(selectedCollectionId);
-
+              selectedCollectionIds.isNotEmpty) {
+            for (final collectionId in selectedCollectionIds) {
+              noteRepository.addNote(
+                title,
+                content,
+                colorId,
+                collectionId,
+              );
+            }
             Navigator.pop(context);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
-                    'Please fill in both the title and note content and select a collection.'),
+                  'Please fill in both the title, note content, and select a collection.',
+                ),
               ),
             );
           }
@@ -199,10 +385,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   }
 
   void addNoteToCollection(String collectionId) {
-    // Generate a unique note_id
     String noteId = FirebaseFirestore.instance.collection('Notes').doc().id;
 
-    // Create the note and add it to the collection
     noteRepository.addNoteToCollection(collectionId, noteId);
   }
 

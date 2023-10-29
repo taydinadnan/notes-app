@@ -84,6 +84,15 @@ class NoteRepository {
     }
   }
 
+  Future<void> removeCollection(String collectionId) async {
+    try {
+      final collectionRef = collectionsCollection.doc(collectionId);
+      await collectionRef.delete();
+    } catch (e) {
+      print("Error removing collection: $e");
+    }
+  }
+
   Stream<QuerySnapshot> getCollections() {
     return collectionsCollection
         .where("creator_id", isEqualTo: currentUserUid)
