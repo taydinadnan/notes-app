@@ -1,7 +1,8 @@
-import 'package:floating_bottom_bar/animated_bottom_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
+import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/view/home/screens/home_screen_widget.dart';
 import 'package:notes_app/view/note/screens/create_note.dart';
@@ -11,13 +12,17 @@ import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/todo_screen.dart';
 
 class CustomNavigationBar extends StatefulWidget {
-  const CustomNavigationBar({super.key});
+  const CustomNavigationBar({Key? key}) : super(key: key);
 
   @override
   State createState() => _CustomNavigationBarState();
 }
 
 class _CustomNavigationBarState extends State<CustomNavigationBar> {
+  final FirebaseAuth user = FirebaseAuth.instance;
+  final NoteRepository noteRepository = NoteRepository();
+  String newCollectionName = '';
+  List<String> creatorIds = [];
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -26,6 +31,87 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
     const TodoScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: AppStyle.bgColor,
+        elevation: 0,
+        currentIndex: _currentIndex,
+        selectedItemColor: AppStyle.buttonColor,
+        unselectedItemColor: AppStyle.black,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(
+              MyFlutterApp.home,
+            ),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.note,
+            ),
+            label: 'Notes',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.check,
+            ),
+            label: 'Todo',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.person,
+            ),
+            label: 'Profile',
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.add),
+                    title: const Text('Add Collection'),
+                    onTap: () {
+                      buildCreateCollectionButton(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.add),
+                    title: const Text('Add Note'),
+                    onTap: () {
+                      triggerAddNoteButton();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.edit),
+                    title: const Text('Add Todo'),
+                    onTap: () {
+                      triggerAddToDoButton();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 
   void triggerAddNoteButton() {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
@@ -42,94 +128,34 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
     }));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppStyle.bgColor,
-      body: _screens[_currentIndex],
-      bottomNavigationBar: AnimatedBottomNavigationBar(
-        barColor: AppStyle.bgColor,
-        bottomBar: [
-          BottomBarItem(
-              icon: const Icon(MyFlutterApp.home),
-              iconSelected: Icon(
-                MyFlutterApp.home,
-                color: AppStyle.buttonColor,
-              ),
-              title: "Home",
-              dotColor: AppStyle.buttonColor,
-              onTap: (value) {
-                setState(() {
-                  _currentIndex = 0;
-                });
-              }),
-          BottomBarItem(
-              icon: const Icon(MyFlutterApp.note),
-              iconSelected: Icon(
-                MyFlutterApp.note,
-                color: AppStyle.buttonColor,
-              ),
-              title: "Notes",
-              dotColor: AppStyle.buttonColor,
-              onTap: (value) {
-                setState(() {
-                  _currentIndex = 1;
-                });
-              }),
-          BottomBarItem(
-              icon: const Icon(MyFlutterApp.checklist),
-              iconSelected: Icon(
-                MyFlutterApp.checklist,
-                color: AppStyle.buttonColor,
-              ),
-              title: "Todo",
-              dotColor: AppStyle.buttonColor,
-              onTap: (value) {
-                setState(() {
-                  _currentIndex = 2;
-                });
-              }),
-          BottomBarItem(
-              icon: const Icon(Icons.person, size: 25),
-              iconSelected: Icon(
-                Icons.person,
-                size: 25,
-                color: AppStyle.buttonColor,
-              ),
-              title: "Profile",
-              dotColor: AppStyle.buttonColor,
-              onTap: (value) {
-                setState(() {
-                  _currentIndex = 3;
-                });
-              }),
-        ],
-        bottomBarCenterModel: BottomBarCenterModel(
-          centerBackgroundColor: AppStyle.buttonColor,
-          centerIcon: const FloatingCenterButton(
-            child: Icon(
-              Icons.add,
-              color: AppColors.white,
-            ),
-          ),
-          centerIconChild: [
-            FloatingCenterButtonChild(
-              onTap: triggerAddNoteButton,
-              child: const Icon(
-                MyFlutterApp.note,
-                color: AppColors.white,
-              ),
-            ),
-            FloatingCenterButtonChild(
-              onTap: triggerAddToDoButton,
-              child: const Icon(
-                MyFlutterApp.checklist,
-                color: AppColors.white,
-              ),
-            ),
-          ],
-        ),
+  AlertDialog buildCreateCollectionButton(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Enter Collection Name'),
+      content: TextField(
+        onChanged: (value) {
+          setState(() {
+            newCollectionName = value;
+          });
+        },
       ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: const Text('Create'),
+          onPressed: () {
+            if (newCollectionName.isNotEmpty) {
+              creatorIds = [user.currentUser!.uid];
+              noteRepository.createCollection(newCollectionName, creatorIds);
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ],
     );
   }
 }

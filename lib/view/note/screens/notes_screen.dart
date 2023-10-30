@@ -7,12 +7,12 @@ import 'package:intl/intl.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/app_text.dart';
 import 'package:notes_app/repository/note_repository.dart';
-import 'package:notes_app/repository/streams/streams.dart';
+import 'package:notes_app/repository/profile_picture_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
 import 'package:notes_app/view/note/widgets/add_note_button.dart';
-import 'package:notes_app/view/note/widgets/drawer.dart';
+import 'package:notes_app/widgets/drawer.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
@@ -27,6 +27,8 @@ class _NotesScreenState extends State<NotesScreen>
   final FirebaseAuth user = FirebaseAuth.instance;
   final UserDataRepository userDataRepository = UserDataRepository();
   final NoteRepository noteRepository = NoteRepository();
+  final ProfilePictureRepository profilePictureRepository =
+      ProfilePictureRepository();
   int colorId = Random().nextInt(AppStyle.cardsColor.length);
   bool isTextFieldVisible = false;
   String filterText = "";
@@ -38,7 +40,7 @@ class _NotesScreenState extends State<NotesScreen>
   @override
   void initState() {
     fetchCollections();
-    getUserProfilePicture(userDataRepository, user);
+    profilePictureRepository.getUserProfilePicture(userDataRepository, user);
     super.initState();
   }
 
@@ -93,7 +95,8 @@ class _NotesScreenState extends State<NotesScreen>
         children: [
           GestureDetector(
             onTap: () => _scaffoldKey.currentState!.openDrawer(),
-            child: getUserProfilePicture(userDataRepository, user),
+            child: profilePictureRepository.getUserProfilePicture(
+                userDataRepository, user),
           ),
           _buildSearchField(),
           IconButton(

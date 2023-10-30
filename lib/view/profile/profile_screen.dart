@@ -8,7 +8,7 @@ import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
-import 'package:notes_app/view/note/widgets/drawer.dart';
+import 'package:notes_app/widgets/drawer.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

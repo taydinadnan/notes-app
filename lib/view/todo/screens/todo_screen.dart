@@ -4,11 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/app_text.dart';
-import 'package:notes_app/repository/streams/streams.dart';
+import 'package:notes_app/repository/profile_picture_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
-import 'package:notes_app/view/note/widgets/drawer.dart';
+import 'package:notes_app/widgets/drawer.dart';
 import 'package:notes_app/view/note/widgets/empty_notes_state_screen.dart';
 import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/edit_todo.dart';
@@ -26,6 +26,8 @@ class _TodoScreenState extends State<TodoScreen> {
   final FirebaseAuth user = FirebaseAuth.instance;
   final UserDataRepository userDataRepository = UserDataRepository();
   final ToDoRepository todos = ToDoRepository();
+  final ProfilePictureRepository profilePictureRepository =
+      ProfilePictureRepository();
   bool isTextFieldVisible = false;
   String filterText = "";
 
@@ -53,7 +55,8 @@ class _TodoScreenState extends State<TodoScreen> {
                 children: [
                   GestureDetector(
                     onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                    child: getUserProfilePicture(userDataRepository, user),
+                    child: profilePictureRepository.getUserProfilePicture(
+                        userDataRepository, user),
                   ),
                   buildSearchField(),
                   IconButton(
@@ -124,45 +127,6 @@ class _TodoScreenState extends State<TodoScreen> {
     );
   }
 
-  // StreamBuilder<QuerySnapshot<Object?>> buildListTodos() {
-  //   return StreamBuilder<QuerySnapshot>(
-  //     stream: todos.getFilteredToDos(filterText),
-  //     builder: (context, snapshot) {
-  //       if (snapshot.connectionState == ConnectionState.waiting) {
-  //         return const Center(child: CircularProgressIndicator());
-  //       } else if (snapshot.hasError) {
-  //         return Center(child: Text('Error: ${snapshot.error}'));
-  //       } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-  //         return const Center(child: Text('No to-do items found.'));
-  //       } else {
-  //         return Padding(
-  //           padding: const EdgeInsets.all(16.0),
-  //           child: ListView(
-  //             children: snapshot.data!.docs.map((doc) {
-  //               return OpenContainer(
-  //                 closedElevation: 0,
-  //                 transitionType: ContainerTransitionType.fade,
-  //                 tappable: false,
-  //                 closedColor: Colors.transparent,
-  //                 closedShape: const RoundedRectangleBorder(
-  //                   borderRadius: BorderRadius.zero,
-  //                 ),
-  //                 closedBuilder: (context, action) {
-  //                   return ToDoCard(onTap: action, doc: doc);
-  //                 },
-  //                 openBuilder: (BuildContext _,
-  //                     CloseContainerActionCallback closeContainer) {
-  //                   return EditToDoScreen(doc);
-  //                 },
-  //               );
-  //             }).toList(),
-  //           ),
-  //         );
-  //       }
-  //     },
-  //   );
-  // }
-
   AppBar buildAppBar() {
     return AppBar(
       backgroundColor: AppStyle.bgColor,
@@ -172,7 +136,8 @@ class _TodoScreenState extends State<TodoScreen> {
         children: [
           GestureDetector(
             onTap: () => _scaffoldKey.currentState!.openDrawer(),
-            child: getUserProfilePicture(userDataRepository, user),
+            child: profilePictureRepository.getUserProfilePicture(
+                userDataRepository, user),
           ),
           buildSearchField(),
           IconButton(

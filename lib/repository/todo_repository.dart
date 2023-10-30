@@ -45,14 +45,6 @@ class ToDoRepository {
         .snapshots();
   }
 
-  // Stream<QuerySnapshot> getFilteredToDos(String filterText) {
-  //   return FirebaseFirestore.instance
-  //       .collection("ToDos")
-  //       .where("title", isGreaterThanOrEqualTo: filterText)
-  //       .where("title", isLessThan: filterText + 'z')
-  //       .snapshots();
-  // }
-
   Stream<QuerySnapshot> getToDosForUser(String userId) {
     return FirebaseFirestore.instance
         .collection('ToDos')
