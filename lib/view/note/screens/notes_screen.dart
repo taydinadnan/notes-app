@@ -238,7 +238,8 @@ class _NotesScreenState extends State<NotesScreen>
     return FirebaseFirestore.instance
         .collection('Notes')
         .where("collection_id", isEqualTo: collectionId)
-        .where("creator_id", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        // .where("creator_ids",
+        //     arrayContains: FirebaseAuth.instance.currentUser!.email)
         .snapshots();
   }
 
@@ -250,6 +251,9 @@ class _NotesScreenState extends State<NotesScreen>
   }
 
   Widget _buildCollectionNotes(String collectionId) {
+    print("Collection ID: $collectionId");
+    print("User's Email: ${FirebaseAuth.instance.currentUser!.email}");
+
     return StreamBuilder<QuerySnapshot>(
       stream: getNotesForCollectionStream(collectionId),
       builder: (context, snapshot) {

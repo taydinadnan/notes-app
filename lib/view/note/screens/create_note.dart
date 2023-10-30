@@ -40,7 +40,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     if (currentUser != null) {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Collections')
-          .where('creator_id', isEqualTo: currentUser.uid)
+          .where('creator_ids', isEqualTo: currentUser.uid)
           .get();
       return querySnapshot.docs;
     }
@@ -92,8 +92,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('Collections')
-          .where('creator_id',
-              isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+          .where('creator_ids', arrayContains: user.currentUser!.email!)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -143,7 +142,12 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
         style: AppStyle.mainTitle.copyWith(fontSize: 15),
       ),
       onSelected: (selected) {
-        showCreateNewCollectionDialog(context, newCollectionName, collections);
+        showCreateNewCollectionDialog(
+          context,
+          newCollectionName,
+          collections,
+          user.currentUser!.email!,
+        );
       },
     );
   }
@@ -182,9 +186,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   }
 
   Future<dynamic> showCreateNewCollectionDialog(
-      BuildContext context,
-      String newCollectionName,
-      List<QueryDocumentSnapshot<Object?>> collections) {
+    BuildContext context,
+    String newCollectionName,
+    List<QueryDocumentSnapshot<Object?>> collections,
+    String currentUserId, // Pass the current user ID
+  ) {
     return showDialog(
       context: context,
       builder: (context) {
@@ -227,7 +233,13 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                     if (newCollectionName.isNotEmpty &&
                         !isDuplicateCollectionName(
                             collections, newCollectionName)) {
-                      noteRepository.createCollection(newCollectionName);
+                      List<String> creatorIds = [
+                        currentUserId
+                      ]; // Add the current user's ID
+                      noteRepository.createCollection(
+                        newCollectionName,
+                        creatorIds,
+                      );
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -368,6 +380,9 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 colorId,
                 collectionId,
               );
+
+              // Call addNoteToCollection for each selected collection
+              addNoteToCollection(collectionId);
             }
             Navigator.pop(context);
           } else {

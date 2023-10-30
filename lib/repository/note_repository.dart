@@ -7,6 +7,7 @@ class NoteRepository {
   String date = DateFormat("dd/MMM/yyyy - HH:mm").format(DateTime.now());
 
   String get currentUserUid => _auth.currentUser?.uid ?? '';
+  String get currentUserEmail => _auth.currentUser?.email ?? '';
 
   CollectionReference notesCollection =
       FirebaseFirestore.instance.collection("Notes");
@@ -55,12 +56,12 @@ class NoteRepository {
   CollectionReference collectionsCollection =
       FirebaseFirestore.instance.collection("Collections");
 
-  Future<void> createCollection(String collectionName) async {
+  Future<void> createCollection(
+      String collectionName, List<String> creatorIds) async {
     try {
       await collectionsCollection.add({
         "name": collectionName,
-        "creator_id": _auth.currentUser!.uid,
-
+        "creator_ids": creatorIds, // Change "creator_id" to "creator_ids"
         "created_date": date,
         "notes": [] // Initialize notes as an empty list
       });
@@ -95,14 +96,14 @@ class NoteRepository {
 
   Stream<QuerySnapshot> getCollections() {
     return collectionsCollection
-        .where("creator_id", isEqualTo: currentUserUid)
+        .where("creator_ids", arrayContains: currentUserEmail)
         .snapshots();
   }
 
   Future<QuerySnapshot> getNotesForCollection(String collectionId) {
     return notesCollection
         .where("collection_id", isEqualTo: collectionId)
-        .where("creator_id", isEqualTo: currentUserUid)
+        .where("creator_ids", arrayContains: currentUserEmail)
         .get();
   }
 }

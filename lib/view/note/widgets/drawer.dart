@@ -27,6 +27,7 @@ class _MyDrawerState extends State<MyDrawer> {
   final UserDataRepository userDataRepository = UserDataRepository();
   int colorId = 0;
   String newCollectionName = '';
+  List<String> creatorIds = [];
 
   String profilePictureURL = ''; // Store profile picture URL
 
@@ -57,7 +58,7 @@ class _MyDrawerState extends State<MyDrawer> {
   Future<List<QueryDocumentSnapshot>> getCollections() async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('Collections')
-        .where("creator_id", isEqualTo: user.currentUser!.uid)
+        .where("creator_ids", arrayContains: user.currentUser!.email)
         .get();
     return querySnapshot.docs;
   }
@@ -156,7 +157,18 @@ class _MyDrawerState extends State<MyDrawer> {
                     final collectionId = collection.id; // Get the collection ID
                     return ListTile(
                       leading: const Icon(Icons.folder),
-                      title: Text(collectionName),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(collectionName),
+                          IconButton(
+                              onPressed: () {
+                                _showDeleteConfirmationDialog(
+                                    context, collectionId);
+                              },
+                              icon: const Icon(MyFlutterApp.x))
+                        ],
+                      ),
                       onTap: () {
                         // Navigate to NotesListScreen when a collection is selected
                         Navigator.push(
@@ -178,6 +190,7 @@ class _MyDrawerState extends State<MyDrawer> {
               return const Text("No Collections");
             },
           ),
+          // Inside the build method of MyDrawer
           ListTile(
             leading: const Icon(Icons.add),
             title: const Text('Create New Collection'),
@@ -204,9 +217,14 @@ class _MyDrawerState extends State<MyDrawer> {
                       TextButton(
                         child: const Text('Create'),
                         onPressed: () {
-                          // Call a function to create the collection with the newCollectionName
-                          noteRepository.createCollection(newCollectionName);
-                          Navigator.of(context).pop();
+                          if (newCollectionName.isNotEmpty) {
+                            // Add the current user's ID to the creatorIds list
+                            creatorIds = [user.currentUser!.uid];
+                            // Call a function to create the collection with the newCollectionName and creatorIds
+                            noteRepository.createCollection(
+                                newCollectionName, creatorIds);
+                            Navigator.of(context).pop();
+                          }
                         },
                       ),
                     ],
@@ -275,5 +293,41 @@ class _MyDrawerState extends State<MyDrawer> {
       // ignore: avoid_print
       print("Error uploading image to Firebase Storage: $e");
     }
+  }
+
+  Future<void> _showDeleteConfirmationDialog(
+      BuildContext context, String collectionId) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Collection'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete this collection?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                Navigator.of(dialogContext).pop();
+                noteRepository.removeCollection(collectionId);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
