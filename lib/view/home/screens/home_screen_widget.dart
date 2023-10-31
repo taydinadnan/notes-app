@@ -7,7 +7,6 @@ import 'package:notes_app/app_text.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/collections_repository.dart';
 import 'package:notes_app/repository/note_repository.dart';
-import 'package:notes_app/repository/profile_picture_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/collections/screens/collection_screen.dart';
@@ -29,10 +28,21 @@ class _HomeScreenState extends State<HomeScreen> {
   final NoteRepository noteRepository = NoteRepository();
   final ToDoRepository todoRepository = ToDoRepository();
   final CollectionsRepository collectionsRepository = CollectionsRepository();
-  final ProfilePictureRepository profilePictureRepository =
-      ProfilePictureRepository();
 
-  final List<QueryDocumentSnapshot> noteList = [];
+  List<QueryDocumentSnapshot> collections = [];
+
+  Future<void> updateCollections() async {
+    final updatedCollections = await collectionsRepository.showCollections();
+    setState(() {
+      collections = updatedCollections;
+    });
+  }
+
+  @override
+  void initState() {
+    updateCollections();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  FutureBuilder<List<QueryDocumentSnapshot<Object?>>> buildCollectionsList() {
+  FutureBuilder<List<QueryDocumentSnapshot>> buildCollectionsList() {
     return FutureBuilder<List<QueryDocumentSnapshot>>(
       future: collectionsRepository.showCollections(),
       builder: (context, snapshot) {
@@ -83,52 +93,27 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         if (snapshot.hasData) {
           final collections = snapshot.data;
-          return Column(
-            children: collections!.asMap().entries.map((entry) {
-              final collection = entry.value;
-              final collectionName = collection.get('name') as String;
-              final collectionId = collection.id;
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                margin: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  leading: Icon(
-                    Icons.folder,
-                    color: AppStyle.cardsColor[1],
-                  ),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: AppStyle.mainTitle,
-                      ),
-                      IconButton(
-                          onPressed: () {
-                            _showDeleteConfirmationDialog(
-                                context, collectionId);
-                          },
-                          icon: const Icon(MyFlutterApp.x))
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotesListScreen(
-                          collectionId: collectionId,
-                          collectionName: collectionName,
-                        ),
-                      ),
-                    );
+
+          if (collections!.isNotEmpty) {
+            return Column(
+              children: collections.asMap().entries.map((entry) {
+                final collection = entry.value;
+                final collectionName = collection.get('name') as String;
+                final collectionId = collection.id;
+                final creatorIds =
+                    collection.get('creator_ids') as List<dynamic>;
+
+                return CollectionCard(
+                  collectionName: collectionName,
+                  collectionId: collectionId,
+                  creatorIds: creatorIds,
+                  onPressed: () {
+                    _showDeleteConfirmationDialog(context, collectionId);
                   },
-                ),
-              );
-            }).toList(),
-          );
+                );
+              }).toList(),
+            );
+          }
         }
         return const Text("No Collections");
       },
@@ -159,15 +144,93 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             TextButton(
               child: const Text('Delete'),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                Navigator.of(dialogContext).pop();
-                noteRepository.removeCollection(collectionId);
+                await noteRepository.removeCollection(collectionId);
+                updateCollections(); // Refresh collections after deletion
               },
             ),
           ],
         );
       },
+    );
+  }
+}
+
+class CollectionCard extends StatelessWidget {
+  final String collectionName;
+  final String collectionId;
+  final List<dynamic> creatorIds;
+  final Function() onPressed;
+
+  const CollectionCard({
+    super.key,
+    required this.collectionName,
+    required this.collectionId,
+    required this.creatorIds,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Function to get the first letter of a string
+    String getFirstLetter(String text) {
+      if (text.isNotEmpty) {
+        return text[0].toUpperCase();
+      } else {
+        return "";
+      }
+    }
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      margin: const EdgeInsets.all(8.0),
+      child: ListTile(
+        leading: Icon(
+          Icons.folder,
+          color: AppStyle.cardsColor[1],
+        ),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              collectionName,
+              style: AppStyle.mainTitle,
+            ),
+            Row(
+              children: creatorIds.map((creator) {
+                String firstLetter = getFirstLetter(creator);
+                return Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: CircleAvatar(
+                    radius: 15,
+                    child: Text(firstLetter),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+        trailing: IconButton(
+          onPressed: onPressed,
+          icon: const Icon(MyFlutterApp.x),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NotesListScreen(
+                collectionId: collectionId,
+                collectionName: collectionName,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
