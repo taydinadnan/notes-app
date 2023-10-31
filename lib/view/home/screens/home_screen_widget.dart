@@ -9,6 +9,7 @@ import 'package:notes_app/repository/profile_picture_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
+import 'package:notes_app/widgets/custom_app_bar.dart';
 import 'package:notes_app/widgets/drawer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -51,11 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GestureDetector(
-                      onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                      child: profilePictureRepository.getUserProfilePicture(
-                          userDataRepository, user),
-                    ),
+                    CustomAppBar(scaffoldKey: _scaffoldKey),
                   ],
                 ),
                 spacingBig,

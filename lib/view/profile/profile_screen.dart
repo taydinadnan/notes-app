@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:notes_app/app_spacing.dart';
 import 'package:notes_app/app_style.dart';
 import 'package:notes_app/app_text.dart';
-import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
+import 'package:notes_app/widgets/custom_app_bar.dart';
 import 'package:notes_app/widgets/drawer.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -55,51 +55,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
       drawer: const MyDrawer(),
       body: CustomPaint(
         painter: BackgroundPainter(),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: 16.0,
-            top: 32,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 16.0, right: 16.0, top: 40),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InkWell(
-                      onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                      child: const Icon(MyFlutterApp.person),
-                    ),
+                    CustomAppBar(scaffoldKey: _scaffoldKey),
                   ],
                 ),
-                spacingMega,
-                profileTitle,
-                spacingMedium,
-                const Center(
-                  child: CircleAvatar(
-                    backgroundImage:
-                        NetworkImage('https://i.imgur.com/lRT3YNb.png'),
-                    radius: 50, // Adjust the size as needed
-                  ),
+              ),
+              spacingMega,
+              profileTitle,
+              spacingMedium,
+              const Center(
+                child: CircleAvatar(
+                  backgroundImage:
+                      NetworkImage('https://i.imgur.com/lRT3YNb.png'),
+                  radius: 50, // Adjust the size as needed
                 ),
-                spacingMedium,
-                Text('Email: ${email ?? 'Loading...'}'),
-                spacingMedium,
-                Text('Username: ${username ?? 'Loading...'}'),
-                spacingMedium,
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to an edit profile screen or show a dialog for editing
-                    // You can pass the current email and username to the edit screen/dialog
-                  },
-                  child: const Text('Edit Profile'),
-                ),
-                spacingMedium,
-              ],
-            ),
+              ),
+              spacingMedium,
+              Text('Email: ${email ?? 'Loading...'}'),
+              spacingMedium,
+              Text('Username: ${username ?? 'Loading...'}'),
+              spacingMedium,
+              ElevatedButton(
+                onPressed: () {
+                  // Navigate to an edit profile screen or show a dialog for editing
+                  // You can pass the current email and username to the edit screen/dialog
+                },
+                child: const Text('Edit Profile'),
+              ),
+              spacingMedium,
+            ],
           ),
         ),
       ),

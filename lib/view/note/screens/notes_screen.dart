@@ -11,7 +11,7 @@ import 'package:notes_app/repository/profile_picture_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
-import 'package:notes_app/view/note/widgets/add_note_button.dart';
+import 'package:notes_app/widgets/custom_app_bar.dart';
 import 'package:notes_app/widgets/drawer.dart';
 
 class NotesScreen extends StatefulWidget {
@@ -83,7 +83,6 @@ class _NotesScreenState extends State<NotesScreen>
           ),
         ),
       ),
-      floatingActionButton: AddNoteButton(colorId: colorId),
     );
   }
 
@@ -93,11 +92,7 @@ class _NotesScreenState extends State<NotesScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: () => _scaffoldKey.currentState!.openDrawer(),
-            child: profilePictureRepository.getUserProfilePicture(
-                userDataRepository, user),
-          ),
+          CustomAppBar(scaffoldKey: _scaffoldKey),
           _buildSearchField(),
           IconButton(
             onPressed: toggleTextFieldVisibility,

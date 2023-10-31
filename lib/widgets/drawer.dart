@@ -9,7 +9,6 @@ import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/collections_repository.dart';
 import 'package:notes_app/repository/note_repository.dart';
 import 'package:notes_app/repository/profile_picture_repository.dart';
-import 'package:notes_app/repository/streams/streams.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/collections/screens/collection_screen.dart';
 import 'package:notes_app/view/note/widgets/color_picker.dart';
@@ -30,6 +29,7 @@ class _MyDrawerState extends State<MyDrawer> {
   final UserDataRepository userDataRepository = UserDataRepository();
   final ProfilePictureRepository profilePictureRepository =
       ProfilePictureRepository();
+  List<QueryDocumentSnapshot>? collections;
   int colorId = 0;
   String newCollectionName = '';
   List<String> creatorIds = [];
@@ -122,10 +122,18 @@ class _MyDrawerState extends State<MyDrawer> {
                 TextButton(
                   child: const Text('Create'),
                   onPressed: () {
-                    if (newCollectionName.isNotEmpty) {
-                      creatorIds = [user.currentUser!.uid];
+                    if (newCollectionName.isNotEmpty &&
+                        !isDuplicateCollectionName(
+                            collections, newCollectionName)) {
+                      creatorIds.add(user.currentUser!.email!);
+
                       noteRepository.createCollection(
-                          newCollectionName, creatorIds);
+                        newCollectionName,
+                        creatorIds,
+                      );
+
+                      creatorIds = [];
+
                       Navigator.of(context).pop();
                     }
                   },
@@ -136,6 +144,17 @@ class _MyDrawerState extends State<MyDrawer> {
         );
       },
     );
+  }
+
+  bool isDuplicateCollectionName(
+    List<QueryDocumentSnapshot>? collections,
+    String newCollectionName,
+  ) {
+    if (collections == null) return false;
+
+    return collections.any((collection) =>
+        collection['name'].toString().toLowerCase() ==
+        newCollectionName.trim().toLowerCase());
   }
 
   FutureBuilder<List<QueryDocumentSnapshot<Object?>>> buildCollectionsList() {
@@ -228,7 +247,7 @@ class _MyDrawerState extends State<MyDrawer> {
   UserAccountsDrawerHeader buildUserAccountsHeader(
       BuildContext context, ProfilePictureWidget profilePicture) {
     return UserAccountsDrawerHeader(
-      accountName: getUserName(userDataRepository, user),
+      accountName: userDataRepository.getUserName(userDataRepository, user),
       accountEmail: Text(user.currentUser!.email!),
       currentAccountPicture: GestureDetector(
         onTap: () => _pickImage(context),

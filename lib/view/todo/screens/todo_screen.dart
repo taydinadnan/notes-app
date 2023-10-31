@@ -8,9 +8,9 @@ import 'package:notes_app/repository/profile_picture_repository.dart';
 import 'package:notes_app/repository/todo_repository.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
+import 'package:notes_app/widgets/custom_app_bar.dart';
 import 'package:notes_app/widgets/drawer.dart';
 import 'package:notes_app/view/note/widgets/empty_notes_state_screen.dart';
-import 'package:notes_app/view/todo/screens/create_todo.dart';
 import 'package:notes_app/view/todo/screens/edit_todo.dart';
 import 'package:notes_app/view/todo/screens/todo_card.dart';
 
@@ -53,11 +53,7 @@ class _TodoScreenState extends State<TodoScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () => _scaffoldKey.currentState!.openDrawer(),
-                    child: profilePictureRepository.getUserProfilePicture(
-                        userDataRepository, user),
-                  ),
+                  CustomAppBar(scaffoldKey: _scaffoldKey),
                   buildSearchField(),
                   IconButton(
                     onPressed: toggleTextFieldVisibility,
@@ -73,17 +69,6 @@ class _TodoScreenState extends State<TodoScreen> {
             Expanded(child: buildTodosList()),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppStyle.buttonColor,
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => CreateToDoPage(todoRepository: todos)));
-          CreateToDoPage(todoRepository: todos);
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

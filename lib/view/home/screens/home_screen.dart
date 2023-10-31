@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app/app_style.dart';
@@ -35,6 +36,7 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppStyle.bgColor,
@@ -83,12 +85,24 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                    leading: const Icon(Icons.add),
-                    title: const Text('Add Collection'),
-                    onTap: () {
-                      buildCreateCollectionButton(context);
-                    },
-                  ),
+                      leading: const Icon(Icons.add),
+                      title: const Text('Add Collection'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        showModalBottomSheet(
+                          elevation: 4,
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) {
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              child: const AddCollectionPage(),
+                            );
+                          },
+                        );
+                      }),
                   ListTile(
                     leading: const Icon(Icons.add),
                     title: const Text('Add Note'),
@@ -127,35 +141,92 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
       );
     }));
   }
+}
 
-  AlertDialog buildCreateCollectionButton(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Enter Collection Name'),
-      content: TextField(
-        onChanged: (value) {
-          setState(() {
-            newCollectionName = value;
-          });
-        },
+class AddCollectionPage extends StatefulWidget {
+  const AddCollectionPage({Key? key}) : super(key: key);
+
+  @override
+  State createState() => _AddCollectionPageState();
+}
+
+class _AddCollectionPageState extends State<AddCollectionPage> {
+  final FirebaseAuth user = FirebaseAuth.instance;
+  final NoteRepository noteRepository = NoteRepository();
+  List<QueryDocumentSnapshot>? collections; // Initialize the collections list
+  String newCollectionName = '';
+  List<String> creatorIds = [];
+
+  Stream<QuerySnapshot<Object?>>? collectionStream;
+  @override
+  void initState() {
+    super.initState();
+    collectionStream = noteRepository.getCollections();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      padding: const EdgeInsets.all(16),
+      duration: const Duration(milliseconds: 100),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const Text(
+            'Enter Collection Name',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                newCollectionName = value;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Create'),
+                onPressed: () {
+                  if (newCollectionName.isNotEmpty &&
+                      !isDuplicateCollectionName(
+                          collections, newCollectionName)) {
+                    creatorIds.add(user.currentUser!.email!);
+
+                    noteRepository.createCollection(
+                      newCollectionName,
+                      creatorIds,
+                    );
+
+                    creatorIds = [];
+
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        TextButton(
-          child: const Text('Create'),
-          onPressed: () {
-            if (newCollectionName.isNotEmpty) {
-              creatorIds = [user.currentUser!.uid];
-              noteRepository.createCollection(newCollectionName, creatorIds);
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-      ],
     );
+  }
+
+  bool isDuplicateCollectionName(
+    List<QueryDocumentSnapshot>? collections,
+    String newCollectionName,
+  ) {
+    if (collections == null) return false;
+
+    return collections.any((collection) =>
+        collection['name'].toString().toLowerCase() ==
+        newCollectionName.trim().toLowerCase());
   }
 }
