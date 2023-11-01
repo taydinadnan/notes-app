@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
 import 'package:notes_app/view/note/screens/edit_note.dart';
@@ -45,28 +46,52 @@ class _NotesListScreenState extends State<NotesListScreen> {
               child: const Text("Add"),
               onPressed: () async {
                 String userId = _userIdController.text;
-                try {
-                  // Assuming you have a reference to the Firestore document where you want to add the user ID
-                  DocumentReference documentReference = FirebaseFirestore
-                      .instance
-                      .collection('Collections')
-                      .doc(widget.collectionId);
+                bool emailExists = await checkEmailExists(userId);
 
-                  // Use FieldValue.arrayUnion to add the user ID to the creator_ids list
-                  await documentReference.update({
-                    "creator_ids": FieldValue.arrayUnion([userId]),
-                  });
-                } catch (e) {
-                  print("Error adding user ID: $e");
+                if (emailExists) {
+                  try {
+                    DocumentReference documentReference = FirebaseFirestore
+                        .instance
+                        .collection('Collections')
+                        .doc(widget.collectionId);
+
+                    await documentReference.update({
+                      "creator_ids": FieldValue.arrayUnion([userId]),
+                    });
+                  } catch (e) {
+                    print("Error adding user ID: $e");
+                  }
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pop();
+                } else {
+                  // Show an error message when the email doesn't exist
+                  // ignore: use_build_context_synchronously
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text("Email does not exist."),
+                    ),
+                  );
                 }
-                // ignore: use_build_context_synchronously
-                Navigator.of(context).pop();
               },
             ),
           ],
         );
       },
     );
+  }
+
+  Future<bool> checkEmailExists(String email) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where("email", isEqualTo: email)
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print("Error checking email existence: $e");
+      return false;
+    }
   }
 
   @override
@@ -78,12 +103,40 @@ class _NotesListScreenState extends State<NotesListScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(widget.collectionName),
+            FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              future: FirebaseFirestore.instance
+                  .collection('Collections')
+                  .doc(widget.collectionId)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  DocumentSnapshot<Map<String, dynamic>> collectionDocument =
+                      snapshot.data!;
+                  Map<String, dynamic>? data = collectionDocument.data();
+
+                  if (data != null && data.containsKey("creator_ids")) {
+                    List<String> creatorIds =
+                        List<String>.from(data["creator_ids"]);
+                    List<String> initials = extractInitials(creatorIds);
+                    List<Widget> avatars =
+                        generateAvatarWidgets(initials, creatorIds);
+
+                    return Row(
+                      children: avatars,
+                    );
+                  }
+                }
+
+                return Container(); // You can show a loading indicator or handle other cases
+              },
+            ),
             IconButton(
               onPressed: () {
                 showAddUserDialog(context);
               },
               icon: const Icon(Icons.add_moderator),
-            )
+            ),
           ],
         ),
       ),
@@ -157,5 +210,100 @@ class _NotesListScreenState extends State<NotesListScreen> {
         .collection('Notes')
         .where("collection_id", isEqualTo: collectionId)
         .snapshots();
+  }
+
+  List<String> extractInitials(List<String> creatorIds) {
+    List<String> initials = [];
+    for (String creatorId in creatorIds) {
+      List<String> nameParts = creatorId.split(' ');
+      if (nameParts.isNotEmpty) {
+        initials.add(nameParts[0][0].toUpperCase());
+      }
+    }
+    return initials;
+  }
+
+  List<Widget> generateAvatarWidgets(
+      List<String> initials, List<String> creatorIds) {
+    List<Widget> avatars = [];
+    for (int i = 0; i < initials.length; i++) {
+      avatars.add(
+        Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: CircleAvatar(
+                radius: 15,
+                child: Text(initials[i]),
+              ),
+            ),
+            Positioned(
+              top: -5,
+              right: -5,
+              child: GestureDetector(
+                onTap: () {
+                  showRemoveConfirmationMenu(context, creatorIds[i]);
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(4.0),
+                  child: Icon(
+                    MyFlutterApp.x,
+                    color: Colors.red,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return avatars;
+  }
+
+  void removeCreatorId(String idToRemove) async {
+    try {
+      DocumentReference documentReference = FirebaseFirestore.instance
+          .collection('Collections')
+          .doc(widget.collectionId);
+
+      await documentReference.update({
+        "creator_ids": FieldValue.arrayRemove([idToRemove]),
+      });
+    } catch (e) {
+      print("Error removing user ID: $e");
+    }
+  }
+
+  Future<void> showRemoveConfirmationMenu(
+      BuildContext context, String idToRemove) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Remove $idToRemove?"),
+          content: Text("Are you sure you want to remove $idToRemove?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text("Remove"),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      // The user confirmed the removal, so you can proceed to remove the creator ID.
+      removeCreatorId(idToRemove);
+    }
   }
 }
