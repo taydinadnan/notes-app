@@ -81,9 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  FutureBuilder<List<QueryDocumentSnapshot>> buildCollectionsList() {
-    return FutureBuilder<List<QueryDocumentSnapshot>>(
-      future: collectionsRepository.showCollections(),
+  StreamBuilder<QuerySnapshot> buildCollectionsList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Collections')
+          .where("creator_ids", arrayContains: user.currentUser!.email)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text("Loading Collections...");
@@ -92,12 +95,11 @@ class _HomeScreenState extends State<HomeScreen> {
           return Text("Error: ${snapshot.error}");
         }
         if (snapshot.hasData) {
-          final collections = snapshot.data;
+          final collections = snapshot.data!.docs;
 
-          if (collections!.isNotEmpty) {
+          if (collections.isNotEmpty) {
             return Column(
-              children: collections.asMap().entries.map((entry) {
-                final collection = entry.value;
+              children: collections.map((collection) {
                 final collectionName = collection.get('name') as String;
                 final collectionId = collection.id;
                 final creatorIds =
