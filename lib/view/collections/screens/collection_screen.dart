@@ -58,6 +58,8 @@ class _NotesListScreenState extends State<NotesListScreen> {
                     await documentReference.update({
                       "creator_ids": FieldValue.arrayUnion([userId]),
                     });
+
+                    showUserAddedNotification(userId); // Show the notification
                   } catch (e) {
                     print("Error adding user ID: $e");
                   }
@@ -305,5 +307,13 @@ class _NotesListScreenState extends State<NotesListScreen> {
       // The user confirmed the removal, so you can proceed to remove the creator ID.
       removeCreatorId(idToRemove);
     }
+  }
+
+  void showUserAddedNotification(String userName) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("$userName has been added to the collection."),
+      ),
+    );
   }
 }
