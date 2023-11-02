@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:notes_app/my_flutter_app_icons.dart';
 import 'package:notes_app/repository/user_data_repository.dart';
 import 'package:notes_app/view/home/widgets/background_painter.dart';
@@ -30,10 +31,10 @@ class _NotesListScreenState extends State<NotesListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Add User ID"),
+          title: const Text("Add User"),
           content: TextField(
             controller: _userIdController,
-            decoration: const InputDecoration(hintText: "Enter User ID"),
+            decoration: const InputDecoration(hintText: "Enter User email"),
           ),
           actions: <Widget>[
             TextButton(
@@ -137,7 +138,10 @@ class _NotesListScreenState extends State<NotesListScreen> {
               onPressed: () {
                 showAddUserDialog(context);
               },
-              icon: const Icon(Icons.add_moderator),
+              icon: Image.asset(
+                "assets/add-user.png",
+                height: 25,
+              ),
             ),
           ],
         ),
@@ -170,41 +174,78 @@ class _NotesListScreenState extends State<NotesListScreen> {
                 int colorIndex = colorId % AppStyle.cardsColor.length;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0),
-                  child: Card(
-                    color: AppStyle.cardsColor[colorIndex],
-                    child: GestureDetector(
-                      onTap: () {
-                        // Navigate to EditNoteScreen when the note is tapped
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditNoteScreen(
-                              note,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
+                    child: Card(
+                      color: AppStyle.cardsColor[colorIndex],
+                      child: GestureDetector(
+                        onTap: () {
+                          // Navigate to EditNoteScreen when the note is tapped
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditNoteScreen(
+                                note,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        title: Text(title),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          );
+                        },
+                        child: Stack(
                           children: [
-                            Text(content),
-                            Text(date), // Convert to readable date format
+                            ListTile(
+                              title: Text(
+                                title,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: AppStyle.mainTitle,
+                              ),
+                              subtitle: SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 35.0),
+                                  child: Text(
+                                    content,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppStyle.mainContent.copyWith(
+                                        color:
+                                            AppStyle.titleColor.withOpacity(1)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: Text(
+                                formatFirestoreDate(date),
+                                overflow: TextOverflow.ellipsis,
+                                style: AppStyle.dateTitle.copyWith(
+                                    color:
+                                        AppStyle.titleColor.withOpacity(0.5)),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                );
+                    ));
               },
             );
           },
         ),
       ),
     );
+  }
+
+  String formatFirestoreDate(String firestoreDate) {
+    final firestoreDateFormat = DateFormat("dd/MMM/yyyy - HH:mm");
+    final desiredFormat = DateFormat("dd MMM");
+
+    try {
+      final date = firestoreDateFormat.parse(firestoreDate);
+      return desiredFormat.format(date);
+    } catch (e) {
+      return "Invalid Date";
+    }
   }
 
   Stream<QuerySnapshot> getNotesForCollectionStream(String collectionId) {

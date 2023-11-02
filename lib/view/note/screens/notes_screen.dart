@@ -305,26 +305,39 @@ class _NotesScreenState extends State<NotesScreen>
                     ),
                   );
                 },
-                child: ListTile(
-                  title: Text(
-                    title,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    style: AppStyle.mainTitle,
-                  ),
-                  subtitle: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        content,
-                        maxLines: 1,
+                child: Stack(
+                  children: [
+                    ListTile(
+                      title: Text(
+                        title,
                         overflow: TextOverflow.ellipsis,
-                        style: AppStyle.mainContent.copyWith(
-                            color: AppStyle.titleColor.withOpacity(1)),
+                        maxLines: 2,
+                        style: AppStyle.mainTitle,
                       ),
-                      Text(formatFirestoreDate(date)),
-                    ],
-                  ),
+                      subtitle: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 35.0),
+                          child: Text(
+                            content,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppStyle.mainContent.copyWith(
+                                color: AppStyle.titleColor.withOpacity(1)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Text(
+                        formatFirestoreDate(date),
+                        overflow: TextOverflow.ellipsis,
+                        style: AppStyle.dateTitle.copyWith(
+                            color: AppStyle.titleColor.withOpacity(0.5)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -398,12 +411,15 @@ class _NotesScreenState extends State<NotesScreen>
                         style: AppStyle.mainTitle,
                       ),
                       subtitle: SingleChildScrollView(
-                        child: Text(
-                          content,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppStyle.mainContent.copyWith(
-                              color: AppStyle.titleColor.withOpacity(1)),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 35.0),
+                          child: Text(
+                            content,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppStyle.mainContent.copyWith(
+                                color: AppStyle.titleColor.withOpacity(1)),
+                          ),
                         ),
                       ),
                     ),

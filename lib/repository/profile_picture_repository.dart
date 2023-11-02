@@ -24,24 +24,6 @@ class ProfilePictureRepository {
 
   Widget getUserProfilePicture(
       UserDataRepository userDataRepository, FirebaseAuth user) {
-    final userProfilePictureCache = UserProfilePictureCache();
-
-    String? cachedProfilePicture =
-        userProfilePictureCache.getFromCache(user.currentUser?.uid ?? "");
-
-    if (cachedProfilePicture != null) {
-      return ClipOval(
-        child: FadeInImage.assetNetwork(
-          fadeInDuration: const Duration(milliseconds: 10),
-          placeholder: "assets/placeHolder.png",
-          image: cachedProfilePicture,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
     return StreamBuilder<QuerySnapshot>(
       stream: userDataRepository.getUsers(),
       builder: (context, snapshot) {
@@ -57,18 +39,22 @@ class ProfilePictureRepository {
             );
             final profilePicture = currentUserData['profilePictureURL'];
 
-            userProfilePictureCache.updateCache(currentUserUid, profilePicture);
+            final userProfilePictureCache = UserProfilePictureCache();
 
-            return ClipOval(
-              child: FadeInImage.assetNetwork(
-                fadeInDuration: const Duration(milliseconds: 10),
-                placeholder: "assets/placeHolder.png",
-                image: profilePicture,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
-              ),
-            );
+            if (profilePicture != null) {
+              userProfilePictureCache.updateCache(
+                  currentUserUid, profilePicture);
+              return ClipOval(
+                child: FadeInImage.assetNetwork(
+                  fadeInDuration: const Duration(milliseconds: 10),
+                  placeholder: "assets/placeHolder.png",
+                  image: profilePicture,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                ),
+              );
+            }
           }
         }
         return ClipOval(
